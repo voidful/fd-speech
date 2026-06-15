@@ -1,0 +1,42 @@
+{
+  "base_model": "models/VoxCPM2/",
+  "lora_config": {
+    "enable_lm": true,
+    "enable_dit": true,
+    "enable_proj": false,
+    "r": 32,
+    "alpha": 32,
+    "dropout": 0.0,
+    "target_modules_lm": [
+      "q_proj",
+      "v_proj",
+      "k_proj",
+      "o_proj"
+    ],
+    "target_modules_dit": [
+      "q_proj",
+      "v_proj",
+      "k_proj",
+      "o_proj"
+    ],
+    "target_proj_modules": [
+      "enc_to_lm_proj",
+      "lm_to_dit_proj",
+      "res_to_dit_proj",
+      "fusion_concat_proj"
+    ]
+  },
+  "meanflow_model": {
+    "enabled": true,
+    "mean_mode": true,
+    "force_float32": true,
+    "t_scheduler": "log-norm",
+    "time_logit_mean": 0.4,
+    "time_logit_std": 1.0,
+    "ratio_r_eq_t": 0.75,
+    "integrated_cfg_omega": 0.3,
+    "integrated_cfg_kappa": 0.9,
+    "effective_cfg_scale": 3.0,
+    "inference_cfg_rate": 3.0
+  }
+}

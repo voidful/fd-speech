@@ -1,0 +1,612 @@
+{
+  "description": "Aligned Seed-TTS English audio examples for core systems and compact three-target SR-FD leave-one-out ablations.",
+  "systems": [
+    {
+      "key": "base4",
+      "name": "Base VoxCPM2",
+      "detail": "4-step, no FT",
+      "group": "core",
+      "metrics": {
+        "wer": "263/11805 = 2.2279%",
+        "quality": "3.2974 / 2.8950 / 3.5296"
+      }
+    },
+    {
+      "key": "base10",
+      "name": "Base VoxCPM2",
+      "detail": "10-step, no FT",
+      "group": "core",
+      "metrics": {
+        "wer": "205/11805 = 1.7366%",
+        "quality": "3.8072 / 3.0866 / 3.6689"
+      }
+    },
+    {
+      "key": "matched_ft",
+      "name": "Matched FT",
+      "detail": "4-step, no SR-FD",
+      "group": "core",
+      "metrics": {
+        "wer": "174/11805 = 1.4740%",
+        "quality": "3.7615 / 3.0729 / 3.6522"
+      }
+    },
+    {
+      "key": "srfd3",
+      "name": "FT + SR-FD",
+      "detail": "4-step, compact 3-target SR-FD",
+      "group": "core",
+      "metrics": {
+        "wer": "167/11805 = 1.4147%",
+        "quality": "3.7637 / 3.0711 / 3.6507"
+      },
+      "highlight": true
+    },
+    {
+      "key": "abl_no_whisper",
+      "name": "Ablation: remove Whisper target",
+      "detail": "no asr_true4_good_whisper",
+      "group": "ablation",
+      "metrics": {
+        "wer": "182/11805 = 1.5417%",
+        "quality": "3.7650 / 3.0754 / 3.6545"
+      }
+    },
+    {
+      "key": "abl_no_realctc",
+      "name": "Ablation: remove real CTC",
+      "detail": "no real_ctc_content",
+      "group": "ablation",
+      "metrics": {
+        "wer": "176/11805 = 1.4909%",
+        "quality": "3.7609 / 3.0731 / 3.6535"
+      }
+    },
+    {
+      "key": "abl_no_teacherctc",
+      "name": "Ablation: remove teacher CTC",
+      "detail": "no teacher_t10_ctc_content",
+      "group": "ablation",
+      "metrics": {
+        "wer": "175/11805 = 1.4824%",
+        "quality": "3.7604 / 3.0756 / 3.6541"
+      }
+    }
+  ],
+  "samples": [
+    {
+      "id": "sample_01",
+      "file": "common_voice_en_537760-common_voice_en_537763.wav",
+      "slug": "common_voice_en_537760-common_voice_en_537763",
+      "reference": "i have watched the caravan as it crossed the desert he said",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "'i have watched the caravan as it crossed the desert' he said'",
+          "wer": 0.25,
+          "audio": "./audio/base4/common_voice_en_537760-common_voice_en_537763.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "'i have watched the caravan as it crossed the desert' he said'",
+          "wer": 0.25,
+          "audio": "./audio/base10/common_voice_en_537760-common_voice_en_537763.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "'i have watched the caravan as it crossed the desert' he said'",
+          "wer": 0.25,
+          "audio": "./audio/matched_ft/common_voice_en_537760-common_voice_en_537763.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "i have watched the caravan as it crossed the desert he said",
+          "wer": 0.0,
+          "audio": "./audio/srfd3/common_voice_en_537760-common_voice_en_537763.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "'i have watched the caravan as it crossed the desert' he said'",
+          "wer": 0.25,
+          "audio": "./audio/abl_no_whisper/common_voice_en_537760-common_voice_en_537763.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "i have watched the caravan as it crossed the desert he said",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_realctc/common_voice_en_537760-common_voice_en_537763.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "i have watched the caravan as it crossed the desert he said",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_537760-common_voice_en_537763.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_537760.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_537760-common_voice_en_537763.wav",
+      "case": "positive"
+    },
+    {
+      "id": "sample_02",
+      "file": "common_voice_en_20041534-common_voice_en_20041536.wav",
+      "slug": "common_voice_en_20041534-common_voice_en_20041536",
+      "reference": "copper wire provides an easily manufactured general purpose voice coil at a reasonable cost",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "copper wire provides an easily manufactured generalpurpose voice coil at a reasonable cost",
+          "wer": 0.14285714285714285,
+          "audio": "./audio/base4/common_voice_en_20041534-common_voice_en_20041536.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "copper wire provides an easily manufactured generalpurpose voice coil at a reasonable cost",
+          "wer": 0.14285714285714285,
+          "audio": "./audio/base10/common_voice_en_20041534-common_voice_en_20041536.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "copper wire provides an easily manufactured generalpurpose voice coil at a reasonable cost",
+          "wer": 0.14285714285714285,
+          "audio": "./audio/matched_ft/common_voice_en_20041534-common_voice_en_20041536.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "copper wire provides an easily manufactured general purpose voice coil at a reasonable cost",
+          "wer": 0.0,
+          "audio": "./audio/srfd3/common_voice_en_20041534-common_voice_en_20041536.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "copper wire provides an easily manufactured generalpurpose voice coil at a reasonable cost",
+          "wer": 0.14285714285714285,
+          "audio": "./audio/abl_no_whisper/common_voice_en_20041534-common_voice_en_20041536.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "copper wire provides an easily manufactured generalpurpose voice coil at a reasonable cost",
+          "wer": 0.14285714285714285,
+          "audio": "./audio/abl_no_realctc/common_voice_en_20041534-common_voice_en_20041536.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "copper wire provides an easily manufactured general purpose voice coil at a reasonable cost",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_20041534-common_voice_en_20041536.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_20041534.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_20041534-common_voice_en_20041536.wav",
+      "case": "positive"
+    },
+    {
+      "id": "sample_03",
+      "file": "common_voice_en_19768597-common_voice_en_19768600.wav",
+      "slug": "common_voice_en_19768597-common_voice_en_19768600",
+      "reference": "as a result they have strong friendships with saint pauli",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "as a result they have strong friendships with st pauli",
+          "wer": 0.1,
+          "audio": "./audio/base4/common_voice_en_19768597-common_voice_en_19768600.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "as a result they have strong friendships with st pauli",
+          "wer": 0.1,
+          "audio": "./audio/base10/common_voice_en_19768597-common_voice_en_19768600.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "as a result they have strong friendships with st pauli",
+          "wer": 0.1,
+          "audio": "./audio/matched_ft/common_voice_en_19768597-common_voice_en_19768600.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "as a result they have strong friendships with saint pauli",
+          "wer": 0.0,
+          "audio": "./audio/srfd3/common_voice_en_19768597-common_voice_en_19768600.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "as a result they have strong friendships with st pauli",
+          "wer": 0.1,
+          "audio": "./audio/abl_no_whisper/common_voice_en_19768597-common_voice_en_19768600.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "as a result they have strong friendships with st pauli",
+          "wer": 0.1,
+          "audio": "./audio/abl_no_realctc/common_voice_en_19768597-common_voice_en_19768600.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "as a result they have strong friendships with st pauli",
+          "wer": 0.1,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_19768597-common_voice_en_19768600.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_19768597.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_19768597-common_voice_en_19768600.wav",
+      "case": "positive"
+    },
+    {
+      "id": "sample_04",
+      "file": "common_voice_en_21869715-common_voice_en_21869718.wav",
+      "slug": "common_voice_en_21869715-common_voice_en_21869718",
+      "reference": "producer arlene sherman has called bert everyone's idea of a blind date",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "producer arlene sherman has called burt everyone's idea of a blind date",
+          "wer": 0.08333333333333333,
+          "audio": "./audio/base4/common_voice_en_21869715-common_voice_en_21869718.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "producer arlene sherman is called burt everyone's idea of a blind date",
+          "wer": 0.16666666666666666,
+          "audio": "./audio/base10/common_voice_en_21869715-common_voice_en_21869718.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "producer arlene sherman has called burt everyone's idea of a blind date",
+          "wer": 0.08333333333333333,
+          "audio": "./audio/matched_ft/common_voice_en_21869715-common_voice_en_21869718.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "producer arlene sherman has called bert everyone's idea of a blind date",
+          "wer": 0.0,
+          "audio": "./audio/srfd3/common_voice_en_21869715-common_voice_en_21869718.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "producer arlene sherman has called bert everyone's idea of a blind date",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_whisper/common_voice_en_21869715-common_voice_en_21869718.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "producer arlene sherman has called bert everyone's idea of a blind date",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_realctc/common_voice_en_21869715-common_voice_en_21869718.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "producer arlene sherman has called burt everyone's idea of a blind date",
+          "wer": 0.08333333333333333,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_21869715-common_voice_en_21869718.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_21869715.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_21869715-common_voice_en_21869718.wav",
+      "case": "positive"
+    },
+    {
+      "id": "sample_05",
+      "file": "common_voice_en_23750957-common_voice_en_23774578.wav",
+      "slug": "common_voice_en_23750957-common_voice_en_23774578",
+      "reference": "in mexico the term onza refers to more than one species",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "in mexico the term anza refers to more than one species",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/base4/common_voice_en_23750957-common_voice_en_23774578.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "in mexico the term onza refers to more than one species",
+          "wer": 0.0,
+          "audio": "./audio/base10/common_voice_en_23750957-common_voice_en_23774578.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "in mexico the term anza refers to more than one species",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/matched_ft/common_voice_en_23750957-common_voice_en_23774578.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "in mexico the term onza refers to more than one species",
+          "wer": 0.0,
+          "audio": "./audio/srfd3/common_voice_en_23750957-common_voice_en_23774578.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "in mexico the term onza refers to more than one species",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_whisper/common_voice_en_23750957-common_voice_en_23774578.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "in mexico the term onza refers to more than one species",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_realctc/common_voice_en_23750957-common_voice_en_23774578.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "in mexico the term onza refers to more than one species",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_23750957-common_voice_en_23774578.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_23750957.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_23750957-common_voice_en_23774578.wav",
+      "case": "positive"
+    },
+    {
+      "id": "sample_06",
+      "file": "common_voice_en_17324784-common_voice_en_17324786.wav",
+      "slug": "common_voice_en_17324784-common_voice_en_17324786",
+      "reference": "as independent studies document the neanderthals developed simple tools such as spears",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spheres",
+          "wer": 0.08333333333333333,
+          "audio": "./audio/base4/common_voice_en_17324784-common_voice_en_17324786.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spears",
+          "wer": 0.0,
+          "audio": "./audio/base10/common_voice_en_17324784-common_voice_en_17324786.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spheres",
+          "wer": 0.08333333333333333,
+          "audio": "./audio/matched_ft/common_voice_en_17324784-common_voice_en_17324786.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spears",
+          "wer": 0.0,
+          "audio": "./audio/srfd3/common_voice_en_17324784-common_voice_en_17324786.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spears",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_whisper/common_voice_en_17324784-common_voice_en_17324786.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spears",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_realctc/common_voice_en_17324784-common_voice_en_17324786.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "as independent studies document the neanderthals developed simple tools such as spears",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_17324784-common_voice_en_17324786.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_17324784.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_17324784-common_voice_en_17324786.wav",
+      "case": "positive"
+    },
+    {
+      "id": "neg_01",
+      "case": "negative",
+      "file": "common_voice_en_20065698-common_voice_en_20065701.wav",
+      "slug": "common_voice_en_20065698-common_voice_en_20065701",
+      "reference": "Flood gates were erected and drainage systems improved.",
+      "note": "Compound-word merge: FT + SR-FD reads \"Flood gates\" as \"Floodgates\", while matched FT and two ablations keep the reference wording.",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "Floodgates were erected and drainage systems improved.",
+          "wer": 0.25,
+          "audio": "./audio/base4/common_voice_en_20065698-common_voice_en_20065701.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "Floodgates were erected and drainage systems improved.",
+          "wer": 0.25,
+          "audio": "./audio/base10/common_voice_en_20065698-common_voice_en_20065701.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "Flood gates were erected and drainage systems improved.",
+          "wer": 0.0,
+          "audio": "./audio/matched_ft/common_voice_en_20065698-common_voice_en_20065701.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "Floodgates were erected and drainage systems improved.",
+          "wer": 0.25,
+          "audio": "./audio/srfd3/common_voice_en_20065698-common_voice_en_20065701.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "Flood gates were erected and drainage systems improved.",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_whisper/common_voice_en_20065698-common_voice_en_20065701.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "Floodgates were erected and drainage systems improved.",
+          "wer": 0.25,
+          "audio": "./audio/abl_no_realctc/common_voice_en_20065698-common_voice_en_20065701.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "Flood gates were erected and drainage systems improved.",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_20065698-common_voice_en_20065701.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_20065698.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_20065698-common_voice_en_20065701.wav"
+    },
+    {
+      "id": "neg_02",
+      "case": "negative",
+      "file": "common_voice_en_38573-common_voice_en_38572.wav",
+      "slug": "common_voice_en_38573-common_voice_en_38572",
+      "reference": "The desert, with its endless monotony, put him to dreaming.",
+      "note": "Extra-word failure: FT + SR-FD adds a trailing \"and\" even though base and matched FT stop correctly.",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "The desert, with its endless monotony, put him to dreaming.",
+          "wer": 0.0,
+          "audio": "./audio/base4/common_voice_en_38573-common_voice_en_38572.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "The desert with its endless monotony put him to dreaming.",
+          "wer": 0.0,
+          "audio": "./audio/base10/common_voice_en_38573-common_voice_en_38572.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "the desert with its endless monotony put him to dreaming",
+          "wer": 0.0,
+          "audio": "./audio/matched_ft/common_voice_en_38573-common_voice_en_38572.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "the desert with its endless monotony put him to dreaming and",
+          "wer": 0.1,
+          "audio": "./audio/srfd3/common_voice_en_38573-common_voice_en_38572.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "the desert with its endless monotony put him to dreaming",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_whisper/common_voice_en_38573-common_voice_en_38572.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "the desert with its endless monotony put him to dreaming and",
+          "wer": 0.1,
+          "audio": "./audio/abl_no_realctc/common_voice_en_38573-common_voice_en_38572.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "the desert with its endless monotony put him to dreaming",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_38573-common_voice_en_38572.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_38573.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_38573-common_voice_en_38572.wav"
+    },
+    {
+      "id": "neg_03",
+      "case": "negative",
+      "file": "common_voice_en_21106663-common_voice_en_21106664.wav",
+      "slug": "common_voice_en_21106663-common_voice_en_21106664",
+      "reference": "A pond has a population of the nationally uncommon warty newt.",
+      "note": "Lexical substitution: FT + SR-FD changes \"warty newt\" to \"wordy newt\"; removing the real CTC target avoids this error.",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "A pond has a population of the nationally uncommon warty newt.",
+          "wer": 0.0,
+          "audio": "./audio/base4/common_voice_en_21106663-common_voice_en_21106664.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "A pond has a population of the nationally uncommon warty newt.",
+          "wer": 0.0,
+          "audio": "./audio/base10/common_voice_en_21106663-common_voice_en_21106664.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "A pond has a population of the nationally uncommon warty newt.",
+          "wer": 0.0,
+          "audio": "./audio/matched_ft/common_voice_en_21106663-common_voice_en_21106664.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "A pond has a population of the nationally uncommon wordy newt.",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/srfd3/common_voice_en_21106663-common_voice_en_21106664.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "A pond has a population of the nationally uncommon wordy newt.",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/abl_no_whisper/common_voice_en_21106663-common_voice_en_21106664.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "A pond has a population of the nationally uncommon warty newt.",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_realctc/common_voice_en_21106663-common_voice_en_21106664.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "A pond has a population of the nationally uncommon wordy newt.",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_21106663-common_voice_en_21106664.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_21106663.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_21106663-common_voice_en_21106664.wav"
+    },
+    {
+      "id": "neg_04",
+      "case": "negative",
+      "file": "common_voice_en_36990355-common_voice_en_36990357.wav",
+      "slug": "common_voice_en_36990355-common_voice_en_36990357",
+      "reference": "Incorporation would also permit Central High to apply for municipal grants.",
+      "note": "Named-entity substitution: FT + SR-FD changes \"Central High\" to \"Central Hyde\"; base 10-step, matched FT, and the no-real-CTC ablation are correct.",
+      "systems": [
+        {
+          "key": "base4",
+          "hyp": "incorporation would also permit Central High to apply for municipal grants. Yes, ma'am.",
+          "wer": 0.18181818181818182,
+          "audio": "./audio/base4/common_voice_en_36990355-common_voice_en_36990357.wav"
+        },
+        {
+          "key": "base10",
+          "hyp": "Incorporation would also permit Central High to apply for municipal grants.",
+          "wer": 0.0,
+          "audio": "./audio/base10/common_voice_en_36990355-common_voice_en_36990357.wav"
+        },
+        {
+          "key": "matched_ft",
+          "hyp": "Incorporation would also permit Central High to apply for municipal grants.",
+          "wer": 0.0,
+          "audio": "./audio/matched_ft/common_voice_en_36990355-common_voice_en_36990357.wav"
+        },
+        {
+          "key": "srfd3",
+          "hyp": "Incorporation would also permit Central Hyde to apply for municipal grants.",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/srfd3/common_voice_en_36990355-common_voice_en_36990357.wav"
+        },
+        {
+          "key": "abl_no_whisper",
+          "hyp": "Incorporation would also permit Central Hyde to apply for municipal grants.",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/abl_no_whisper/common_voice_en_36990355-common_voice_en_36990357.wav"
+        },
+        {
+          "key": "abl_no_realctc",
+          "hyp": "Incorporation would also permit Central High to apply for municipal grants.",
+          "wer": 0.0,
+          "audio": "./audio/abl_no_realctc/common_voice_en_36990355-common_voice_en_36990357.wav"
+        },
+        {
+          "key": "abl_no_teacherctc",
+          "hyp": "Incorporation would also permit Central Hyde to apply for municipal grants.",
+          "wer": 0.09090909090909091,
+          "audio": "./audio/abl_no_teacherctc/common_voice_en_36990355-common_voice_en_36990357.wav"
+        }
+      ],
+      "prompt_audio": "./audio/reference_prompt/common_voice_en_36990355.wav",
+      "target_audio": "./audio/reference_target/common_voice_en_36990355-common_voice_en_36990357.wav"
+    }
+  ]
+}

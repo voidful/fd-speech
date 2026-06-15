@@ -1,0 +1,176 @@
+# =============================================================================
+# SR-FD compact three-target fine-tuning config (paper main model).
+#
+# This is the configuration of the four-step SR-FD model reported in the paper
+# (the step-1600 three-target run, 167/11805 upstream Seed-TTS English errors).
+# The base model is the external, tokenizer-free flow-matching TTS model
+# VoxCPM2 (openbmb/VoxCPM2); SR-FD is added as one extra training loss on top
+# of LoRA fine-tuning. See docs/integration.md for how `loss/srfd` is wired
+# into the training step.
+#
+# Stage 2 (this file) is a small residual refinement: starting from a
+# supervised LoRA adaptation (`init_lora_path`), it runs 1600 further steps
+# with SR-FD enabled.
+# =============================================================================
+
+seed: 42
+pretrained_path: models/VoxCPM2/                       # external base model
+init_lora_path: checkpoints/stage1_supervised_lora/    # stage-1 LoRA adapter
+save_path: checkpoints/srfd_compact3
+# Fine-tuning manifest derived from LibriTTS voice-cloning material
+# (target text + continuation prompt + per-utterance training weights).
+train_manifest: data/libritts/manifests/train.jsonl
+val_manifest: ''
+
+sample_rate: 16000
+out_sample_rate: 48000
+num_iters: 1600
+max_steps: 1600
+save_interval: 100        # checkpoints every 100 steps
+valid_interval: 1000
+log_interval: 10
+keep_last_n: 25
+
+# --- optimization (Section IV-C) -------------------------------------------
+precision: bf16
+learning_rate: 3.0e-08    # cosine to zero, no warmup
+weight_decay: 0.01
+warmup_steps: 0
+max_grad_norm: 0.03
+batch_size: 1
+max_batch_tokens: 3584
+grad_accum_steps: 1
+num_workers: 2
+tensorboard: logs/srfd_compact3
+
+# --- LoRA: rank 32 / alpha 32 on q,k,v,o of the LM and DiT -----------------
+lora:
+  enable_lm: true
+  enable_dit: true
+  enable_proj: false
+  r: 32
+  alpha: 32
+  dropout: 0.0
+
+# --- deployment-time four-step sampler (used during training, too) ---------
+sampler:
+  n_timesteps: 4
+  solver: euler
+  cfg_value: 2.45
+  cfg_rescale_phi: 0.0
+  acoustic_temperature: 1.0
+  sway_sampling_coef: 1.0
+  use_cfg_zero_star: false
+
+# --- loss weights ----------------------------------------------------------
+# loss/diff (w_fm) and loss/stop (w_stop) are the base flow-matching + stop
+# losses. loss/srfd is this paper's term (lambda_srfd = 2e-4). The remaining
+# three are small auxiliary losses inherited from the underlying recipe and
+# are NOT a contribution of this paper; their weights are fixed in all runs.
+lambdas:
+  loss/diff: 0.006              # w_fm
+  loss/stop: 0.08               # w_stop
+  loss/srfd: 0.0002             # lambda_srfd
+  loss/teacher_endpoint: 0.001  # inherited aux
+  loss/preference_feature: 0.001  # inherited aux
+  loss/whisper_text: 1.0e-05    # inherited aux
+
+# ===========================================================================
+# SR-FD (this paper's contribution)
+# ===========================================================================
+srfd:
+  enabled: true
+  every_n_steps: 1
+  warmup_steps: 0
+
+  # During each update, synthesize a complete short utterance with the
+  # deployment-time four-step sampler, keeping the computation differentiable.
+  sample_generate: true
+  sample_n_timesteps: 4
+  sample_cfg_value: 2.45
+  sample_cfg_rescale_phi: 0.0
+  sample_acoustic_temperature: 1.0
+  sample_sway_sampling_coef: 1.0
+  sample_use_cfg_zero_star: false
+  sample_autoregressive_context: true
+
+  # Generated moments are estimated from a feature queue of recent updates;
+  # queued features are detached, only the current mini-batch keeps gradient.
+  stats_mode: queue
+  queue_size: 50000
+  queue_warmup_size: 1
+  queue_include_current: true
+  queue_update: true
+
+  # Per-target normalization: divide each FD term by its own detached value so
+  # the Whisper and CTC branches are balanced by gradient scale, not raw scale.
+  normalize: true
+  normalize_total_weight: true
+  target_total_weight: 1.0
+  target_mode: weighted
+  target_temperature: 1.0
+  eps: 1.0e-06
+
+  # --- the three reference targets (offline first/second-order moments) -----
+  # 1. low-step Whisper anchor : ASR-verified 4-step generations  (Whisper)
+  # 2. teacher CTC target      : 10-step teacher generations      (CTC)
+  # 3. real-speech CTC target  : real LibriTTS voice-cloning speech (CTC)
+  # Raw weights 1.0 / 0.5 / 0.5 so the Whisper and CTC branches contribute
+  # equally and the two CTC targets split the CTC half.
+  reference_stats_paths:
+    - name: asr_true4_good_whisper
+      path: stats/ref_whisper_anchor_asr_true4_good.pt
+      weight: 1.0
+    - name: teacher_t10_ctc_content
+      path: stats/ref_ctc_content_teacher_t10.pt
+      weight: 0.5
+    - name: real_ctc_content
+      path: stats/ref_ctc_content_real_voiceclone.pt
+      weight: 0.5
+
+  # A sample enters the loss only when its duration is close to the target
+  # duration (ratio in [0.92, 1.08]); strongly mismatched samples usually
+  # contain truncation or runaway speech.
+  length_gate:
+    enabled: true
+    max_abs_dev: 0.08
+    min_ratio: 0.92
+    max_ratio: 1.08
+
+  conditioner:
+    enabled: false
+
+  # --- the two frozen extractors -------------------------------------------
+  reps:
+    # Whisper semantic space: large-v3 encoder, last-4 layers, 8 soft time
+    # anchors, each projected to 64 dims by a fixed random projection.
+    - name: whisper_anchor8_p64
+      type: whisper_encoder_anchor
+      model_path: models/whisper-large-v3
+      target_sample_rate: 16000
+      input_sample_rate: 48000
+      layer_pool: last4
+      projection_dim: 64
+      projection_seed: 260121386
+      num_anchors: 8
+      anchor_min: 0.03
+      anchor_max: 0.97
+      bandwidth: 0.08
+      include_deltas: true
+      project_each_anchor: true
+      max_seconds: 10.0
+      weight: 1.0
+    # CTC phonetic space: wav2vec2-base-960h posteriors, non-blank content
+    # randomly projected to 64 dims, plus blank/timing statistics.
+    - name: ctc_content_p64
+      type: ctc_content_stats
+      model_path: models/wav2vec2-base-960h
+      target_sample_rate: 16000
+      input_sample_rate: 48000
+      projection_dim: 64
+      projection_seed: 260121386
+      pooling: meanstd
+      normalize_nonblank: true
+      include_blank_stats: true
+      max_seconds: 10.0
+      weight: 1.0

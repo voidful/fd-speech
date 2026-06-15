@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+
+# Caches / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# Models / data / runs (provide your own; not tracked)
+models/
+data/
+checkpoints/
+logs/
+stats/*.pt
+runs/
+
+# Local experiment outputs
+experiments/synthetic_validation.json

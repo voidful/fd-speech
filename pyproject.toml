@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "srfd"
+version = "0.1.0"
+description = "Speech Representation Fréchet Distance (SR-FD) loss for few-step flow-matching TTS"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+keywords = ["text-to-speech", "flow-matching", "frechet-distance", "speech-generation", "lora"]
+
+# Core dependency for the differentiable loss and moment/Fréchet utilities.
+dependencies = [
+    "torch>=2.5",
+]
+
+[project.optional-dependencies]
+# Frozen content extractors (Whisper encoder + wav2vec2 CTC) and reference-stat
+# computation from audio.
+extractors = [
+    "transformers>=4.40",
+    "torchaudio>=2.5",
+    "soundfile",
+    "pyyaml",
+]
+# Seed-TTS evaluation (WER / SIM / UTMOS / DNSMOS) and significance tests.
+eval = [
+    "transformers>=4.40",
+    "torchaudio>=2.5",
+    "soundfile",
+    "scipy",
+    "numpy",
+    "jiwer",
+    "librosa",
+]
+test = [
+    "pytest",
+    "pyyaml",
+]
+
+[tool.setuptools]
+packages = ["srfd"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

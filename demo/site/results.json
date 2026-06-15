@@ -1,0 +1,144 @@
+{
+  "benchmark": "Seed-TTS English test-en",
+  "scorer": "Upstream Seed-TTS WER",
+  "reference_words": 11805,
+  "status": {
+    "compact3": "selected_bal_step1600_packaged",
+    "selected_adapter": "model/lora_weights.safetensors"
+  },
+  "systems": [
+    {
+      "name": "Base VoxCPM2",
+      "steps": "4",
+      "ft": false,
+      "srfd": false,
+      "wer_errors": 263,
+      "wer_words": 11805,
+      "wer_percent": 2.2279,
+      "utmos": 3.2974,
+      "dnsmos_ovrl": 2.895,
+      "dnsmos_p808": 3.5296,
+      "note": "Unfine-tuned four-step VoxCPM2 baseline."
+    },
+    {
+      "name": "Base VoxCPM2",
+      "steps": "10",
+      "ft": false,
+      "srfd": false,
+      "wer_errors": 205,
+      "wer_words": 11805,
+      "wer_percent": 1.7366,
+      "utmos": 3.8072,
+      "dnsmos_ovrl": 3.0866,
+      "dnsmos_p808": 3.6689,
+      "note": "Unfine-tuned ten-step VoxCPM2 baseline."
+    },
+    {
+      "name": "Matched FT",
+      "steps": "4",
+      "ft": true,
+      "srfd": false,
+      "wer_errors": 174,
+      "wer_words": 11805,
+      "wer_percent": 1.474,
+      "utmos": 3.7615,
+      "dnsmos_ovrl": 3.0729,
+      "dnsmos_p808": 3.6522,
+      "note": "Strict matched no-FD fine-tuning control."
+    },
+    {
+      "name": "FT + SR-FD",
+      "steps": "4",
+      "ft": true,
+      "srfd": true,
+      "wer_errors": 167,
+      "wer_words": 11805,
+      "wer_percent": 1.4147,
+      "utmos": 3.7637,
+      "dnsmos_ovrl": 3.0711,
+      "dnsmos_p808": 3.6507,
+      "highlight": true,
+      "note": "Packaged demo adapter: balanced compact 3-target SR-FD, step 1600."
+    },
+    {
+      "name": "ARCHI-TTS reported",
+      "steps": "4 / few-step",
+      "ft": null,
+      "srfd": null,
+      "wer_errors": null,
+      "wer_words": null,
+      "wer_percent": 1.47,
+      "utmos": null,
+      "dnsmos_ovrl": null,
+      "dnsmos_p808": null,
+      "note": "Reported WER reference only; audio unavailable for proxy scoring."
+    }
+  ],
+  "compact3_targets": [
+    {
+      "name": "asr_true4_good_whisper",
+      "extractor": "Whisper content",
+      "source": "ASR-reranked good true-4 generations"
+    },
+    {
+      "name": "teacher_t10_ctc_content",
+      "extractor": "CTC content",
+      "source": "Ten-step VoxCPM2 teacher generations"
+    },
+    {
+      "name": "real_ctc_content",
+      "extractor": "CTC content",
+      "source": "Real LibriTTS voice-cloning speech"
+    }
+  ],
+  "compact3_variants": [
+    {
+      "slug": "bal",
+      "checkpoint": "step_0001600",
+      "wer_errors": 167,
+      "wer_words_local_count": 11806,
+      "paper_reference_words": 11805,
+      "wer_percent_paper_denominator": 1.4147,
+      "utmos": 3.7637,
+      "dnsmos_ovrl": 3.0711,
+      "dnsmos_p808": 3.6507,
+      "selection": "selected_demo_adapter"
+    },
+    {
+      "slug": "ctc65",
+      "checkpoint": "step_0001600",
+      "wer_errors": 182,
+      "wer_words_local_count": 11806,
+      "paper_reference_words": 11805,
+      "wer_percent_paper_denominator": 1.5417,
+      "utmos": 3.7616,
+      "dnsmos_ovrl": 3.077,
+      "dnsmos_p808": 3.6506,
+      "selection": "not_selected_higher_wer"
+    },
+    {
+      "slug": "tctc70",
+      "checkpoint": "step_0001600",
+      "wer_errors": 176,
+      "wer_words_local_count": 11806,
+      "paper_reference_words": 11805,
+      "wer_percent_paper_denominator": 1.4909,
+      "utmos": 3.7643,
+      "dnsmos_ovrl": 3.0768,
+      "dnsmos_p808": 3.6526,
+      "selection": "not_selected_higher_wer"
+    },
+    {
+      "slug": "rctc70",
+      "checkpoint": "step_0000500",
+      "wer_errors": 173,
+      "wer_words_local_count": 11806,
+      "paper_reference_words": 11805,
+      "wer_percent_paper_denominator": 1.4655,
+      "utmos": 3.7623,
+      "dnsmos_ovrl": 3.0788,
+      "dnsmos_p808": 3.6531,
+      "selection": "not_selected_higher_wer"
+    }
+  ]
+}

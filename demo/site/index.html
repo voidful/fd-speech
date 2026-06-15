@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SRFD-VoxCPM2 Demo</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Tokenizer-free few-step TTS</p>
+        <h1>SRFD-VoxCPM2</h1>
+      </div>
+      <nav aria-label="Sections">
+        <a href="#audio">Audio</a>
+        <a href="#results">Results</a>
+        <a href="#targets">3-Target FD</a>
+        <a href="#model">Model</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="summary-band">
+        <div class="summary-grid">
+          <div class="metric">
+            <span class="label">4-step baseline WER</span>
+            <strong>2.2279%</strong>
+            <span>263 / 11805</span>
+          </div>
+          <div class="metric primary">
+            <span class="label">SR-FD 4-step WER</span>
+            <strong>1.4147%</strong>
+            <span>167 / 11805</span>
+          </div>
+          <div class="metric">
+            <span class="label">Relative WER drop</span>
+            <strong>36.5%</strong>
+            <span>vs. base 4-step</span>
+          </div>
+          <div class="metric">
+            <span class="label">Step reduction</span>
+            <strong>4 steps</strong>
+            <span>beats base 10-step</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="audio" class="section">
+        <div class="section-head">
+          <h2>Aligned Audio Examples</h2>
+          <p>
+            Each row uses the same Seed-TTS English prompt across baselines, matched fine-tuning,
+            SR-FD, and compact three-target ablations. The prompt reference audio, target
+            reference audio, reference transcript, ASR transcript, and per-utterance WER are
+            shown for every model so both zero-WER successes and negative cases can be checked
+            directly.
+          </p>
+        </div>
+        <div class="audio-controls" role="tablist" aria-label="Audio comparison view">
+          <button class="seg active" type="button" data-audio-view="core">Core Methods</button>
+          <button class="seg" type="button" data-audio-view="ablation">3-Target Ablations</button>
+          <button class="seg" type="button" data-audio-view="negative">Negative Cases</button>
+        </div>
+        <div id="audio-examples" class="examples"></div>
+      </section>
+
+      <section id="results" class="section">
+        <div class="section-head">
+          <h2>Main Seed-TTS English Results</h2>
+          <p>WER uses the upstream Seed-TTS scorer. UTMOS and DNSMOS are objective proxies, not human MOS.</p>
+        </div>
+        <div class="table-wrap">
+          <table id="results-table">
+            <thead>
+              <tr>
+                <th>System</th>
+                <th>Steps</th>
+                <th>FT</th>
+                <th>SR-FD</th>
+                <th>Upstream WER</th>
+                <th>UTMOS / DNSMOS OVRL / P808</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="targets" class="section split">
+        <div>
+          <h2>Compact 3-Target FD</h2>
+          <p>
+            The compact model keeps the FD loss focused on intelligibility:
+            one Whisper target anchors successful low-step generations, while
+            two CTC targets match generated speech to teacher and real-speech
+            ASR-posterior statistics.
+          </p>
+        </div>
+        <div class="target-list" id="target-list"></div>
+      </section>
+
+      <section id="model" class="section split">
+        <div>
+          <h2>Model Artifact</h2>
+          <p>
+            This repository packages a LoRA adapter for <code>openbmb/VoxCPM2</code>.
+            It is not a standalone full model. The included adapter is the
+            compact 3-target SR-FD balanced checkpoint at step 1600, selected by
+            full upstream Seed-TTS English WER.
+          </p>
+        </div>
+        <pre class="code"><code>from voxcpm import VoxCPM
+
+model = VoxCPM.from_pretrained("openbmb/VoxCPM2")
+# Load the SR-FD LoRA adapter from ./model using the repository loader.
+wav = model.generate(
+    text="SR-FD improves true four-step VoxCPM2 synthesis.",
+    cfg_value=2.35,
+    inference_timesteps=4,
+)</code></pre>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

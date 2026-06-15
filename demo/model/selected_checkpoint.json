@@ -1,0 +1,18 @@
+{
+  "slug": "srfd_compact3",
+  "checkpoint_dir": "checkpoints/srfd_compact3/step_0001600",
+  "base_model": "openbmb/VoxCPM2",
+  "artifact_type": "LoRA adapter",
+  "selection_metric": "full upstream Seed-TTS English WER",
+  "upstream_wer": "167/11805 = 1.4147%",
+  "wer_errors": 167,
+  "wer_words_paper_denominator": 11805,
+  "utmos": 3.7637,
+  "dnsmos_ovrl": 3.0711,
+  "dnsmos_p808": 3.6507,
+  "srfd_targets": [
+    "asr_true4_good_whisper",
+    "teacher_t10_ctc_content",
+    "real_ctc_content"
+  ]
+}

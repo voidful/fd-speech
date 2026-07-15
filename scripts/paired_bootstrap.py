@@ -34,7 +34,7 @@ import numpy as np
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--a", required=True, help="per_utt JSONL for system A (e.g. baseline).")
-    p.add_argument("--b", required=True, help="per_utt JSONL for system B (e.g. SR-FD).")
+    p.add_argument("--b", required=True, help="per_utt JSONL for system B (e.g. FDSpeech).")
     p.add_argument("--metric", default="wer", help="Field name to compare (wer or cer).")
     p.add_argument("--id_field", default="gen_wav", help="Field used to align utterances.")
     p.add_argument("--n_bootstrap", type=int, default=10000)

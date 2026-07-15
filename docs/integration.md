@@ -1,6 +1,6 @@
-# Integrating SR-FD into a few-step flow-matching TTS model
+# Integrating FDSpeech into a few-step flow-matching TTS model
 
-SR-FD is model-agnostic: it only needs (1) a **differentiable** few-step
+FDSpeech is model-agnostic: it only needs (1) a **differentiable** few-step
 sampler and (2) the generated waveform. This repository implements the loss and
 extractors; the base model is the external, tokenizer-free flow-matching TTS
 model VoxCPM2 (`openbmb/VoxCPM2`), used through a LoRA adapter. This document
@@ -9,7 +9,7 @@ shows the three integration points so the method can be reproduced or ported.
 ## 1. A differentiable few-step sampler
 
 Many flow-matching decoders wrap their sampling loop in
-`@torch.inference_mode()`, which blocks gradients. SR-FD needs gradients to
+`@torch.inference_mode()`, which blocks gradients. FDSpeech needs gradients to
 flow from the loss, through the generated latent, back into the (LoRA) weights.
 Add a sibling `sample()` method with identical numerics but **without** the
 inference-mode decorator. In VoxCPM2 this lives on the flow-matching decoder
@@ -19,7 +19,7 @@ inference-mode decorator. In VoxCPM2 this lives on the flow-matching decoder
 def sample(self, mu, n_timesteps, patch_size, cond,
            temperature=1.0, cfg_value=1.0, sway_sampling_coef=1.0,
            use_cfg_zero_star=True, initial_noise=None, return_trajectory=False):
-    """Differentiable sampling path used by SR-FD.
+    """Differentiable sampling path used by FDSpeech.
 
     Identical in numerics to `forward` but without `inference_mode`, so
     gradients can flow back through the produced latent into `mu`.
@@ -39,16 +39,16 @@ Build the extractors and the loss once, from the `srfd` block of the config:
 
 ```python
 import yaml, torch
-from srfd import SRFDEmaLoss, build_srfd_extractors, load_stats
+from fdspeech import FDSpeechLoss, build_fdspeech_extractors, load_stats
 
 cfg = yaml.safe_load(open("configs/srfd_compact3.yaml"))["srfd"]
 
-extractors = build_srfd_extractors(cfg["reps"])           # Whisper + CTC
+extractors = build_fdspeech_extractors(cfg["reps"])       # Whisper + CTC
 targets = [                                               # three reference targets
     {"name": t["name"], "weight": t["weight"], "stats": load_stats(t["path"])}
     for t in cfg["reference_stats_paths"]
 ]
-srfd_loss = SRFDEmaLoss(
+srfd_loss = FDSpeechLoss(
     extractors=extractors,
     real_stats=targets,
     stats_mode=cfg["stats_mode"],          # "queue"
@@ -63,7 +63,7 @@ srfd_loss = SRFDEmaLoss(
 
 On each step: (a) sample a short utterance with the differentiable four-step
 sampler, (b) decode it to a waveform, (c) apply the length gate, (d) call the
-SR-FD loss, and (e) add it to the base objective. Sketch:
+FDSpeech loss, and (e) add it to the base objective. Sketch:
 
 ```python
 # (a) differentiable few-step generation (same settings as deployment)
@@ -75,7 +75,7 @@ wav = model.audio_vae.decode(gen_latent)
 ratio = generated_duration / target_duration
 keep = (ratio >= 0.92) & (ratio <= 1.08)
 
-# (d) SR-FD reads the generated waveform (+ mask + sample rate)
+# (d) FDSpeech reads the generated waveform (+ mask + sample rate)
 srfd_batch = {
     "waveform": wav[keep],
     "waveform_mask": wav_mask[keep],
@@ -94,29 +94,40 @@ loss.backward()
 ### Numerical notes
 
 * The Fréchet term uses `torch.linalg.eigh`, which has no bf16 CUDA kernel.
-  Wrap the SR-FD call in `torch.amp.autocast(device_type="cuda", enabled=False)`
+  Wrap the FDSpeech call in `torch.amp.autocast(device_type="cuda", enabled=False)`
   so the eigendecomposition runs in fp32 while the rest of the step stays bf16.
 * The queue detaches features from previous steps, so the autograd graph never
   grows across steps; only the current mini-batch carries gradient.
-* SR-FD activates after `warmup_steps`, so the base losses stabilize training
+* FDSpeech activates after `warmup_steps`, so the base losses stabilize training
   before the distributional term turns on.
 
 ## 4. Inference (deployment)
 
-At test time SR-FD is gone entirely — the deployed model is the base four-step
+At test time the FD loss is gone entirely — the deployed model is the base four-step
 model plus the LoRA adapter. Loading the adapter and generating:
 
 With a current upstream `voxcpm` installation, load the adapter when the base
 model is constructed and use the public `inference_timesteps` argument:
 
 ```python
+import json
+import os
+
 import soundfile as sf
+from huggingface_hub import snapshot_download
 from voxcpm import VoxCPM
+from voxcpm.model.voxcpm import LoRAConfig
+
+adapter_dir = snapshot_download("voidful/FDSpeech-VoxCPM2")
+with open(os.path.join(adapter_dir, "lora_config.json"), encoding="utf-8") as handle:
+    adapter_info = json.load(handle)
 
 model = VoxCPM.from_pretrained(
-    "openbmb/VoxCPM2",
+    hf_model_id="openbmb/VoxCPM2",
     load_denoiser=False,
-    lora_weights_path="demo/model",
+    optimize=True,
+    lora_config=LoRAConfig(**adapter_info["lora_config"]),
+    lora_weights_path=adapter_dir,
 )
 wav = model.generate(
     text="The quick brown fox jumps over the lazy dog.",
@@ -126,7 +137,7 @@ wav = model.generate(
     denoise=False,
     seed=0,
 )
-sf.write("srfd.wav", wav, model.tts_model.sample_rate)
+sf.write("fdspeech.wav", wav, model.tts_model.sample_rate)
 ```
 
 No extractors, queues, reference moments, or Fréchet computation are involved at

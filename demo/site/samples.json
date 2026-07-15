@@ -1,5 +1,5 @@
 {
-  "description": "Aligned Seed-TTS English audio examples for core systems and compact three-target SR-FD leave-one-out ablations.",
+  "description": "Aligned Seed-TTS English audio examples for core systems and compact three-target FDSpeech leave-one-out ablations.",
   "systems": [
     {
       "key": "base4",
@@ -24,7 +24,7 @@
     {
       "key": "matched_ft",
       "name": "Matched FT",
-      "detail": "4-step, no SR-FD",
+      "detail": "4-step, no FD loss",
       "group": "core",
       "metrics": {
         "wer": "174/11805 = 1.4740%",
@@ -33,8 +33,8 @@
     },
     {
       "key": "srfd3",
-      "name": "FT + SR-FD",
-      "detail": "4-step, compact 3-target SR-FD",
+      "name": "FDSpeech",
+      "detail": "4-step, compact 3-target FD loss",
       "group": "core",
       "metrics": {
         "wer": "167/11805 = 1.4147%",
@@ -398,7 +398,7 @@
       "file": "common_voice_en_20065698-common_voice_en_20065701.wav",
       "slug": "common_voice_en_20065698-common_voice_en_20065701",
       "reference": "Flood gates were erected and drainage systems improved.",
-      "note": "Compound-word merge: FT + SR-FD reads \"Flood gates\" as \"Floodgates\", while matched FT and two ablations keep the reference wording.",
+      "note": "Compound-word merge: FDSpeech reads \"Flood gates\" as \"Floodgates\", while matched FT and two ablations keep the reference wording.",
       "systems": [
         {
           "key": "base4",
@@ -452,7 +452,7 @@
       "file": "common_voice_en_38573-common_voice_en_38572.wav",
       "slug": "common_voice_en_38573-common_voice_en_38572",
       "reference": "The desert, with its endless monotony, put him to dreaming.",
-      "note": "Extra-word failure: FT + SR-FD adds a trailing \"and\" even though base and matched FT stop correctly.",
+      "note": "Extra-word failure: FDSpeech adds a trailing \"and\" even though base and matched FT stop correctly.",
       "systems": [
         {
           "key": "base4",
@@ -506,7 +506,7 @@
       "file": "common_voice_en_21106663-common_voice_en_21106664.wav",
       "slug": "common_voice_en_21106663-common_voice_en_21106664",
       "reference": "A pond has a population of the nationally uncommon warty newt.",
-      "note": "Lexical substitution: FT + SR-FD changes \"warty newt\" to \"wordy newt\"; removing the real CTC target avoids this error.",
+      "note": "Lexical substitution: FDSpeech changes \"warty newt\" to \"wordy newt\"; removing the real CTC target avoids this error.",
       "systems": [
         {
           "key": "base4",
@@ -560,7 +560,7 @@
       "file": "common_voice_en_36990355-common_voice_en_36990357.wav",
       "slug": "common_voice_en_36990355-common_voice_en_36990357",
       "reference": "Incorporation would also permit Central High to apply for municipal grants.",
-      "note": "Named-entity substitution: FT + SR-FD changes \"Central High\" to \"Central Hyde\"; base 10-step, matched FT, and the no-real-CTC ablation are correct.",
+      "note": "Named-entity substitution: FDSpeech changes \"Central High\" to \"Central Hyde\"; base 10-step, matched FT, and the no-real-CTC ablation are correct.",
       "systems": [
         {
           "key": "base4",

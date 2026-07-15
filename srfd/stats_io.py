@@ -1,4 +1,4 @@
-"""Save/load reference statistics for SR-FD.
+"""Save/load reference statistics for FDSpeech.
 
 The on-disk format is a torch ``.pt`` file containing a single dict::
 

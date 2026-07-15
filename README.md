@@ -1,10 +1,10 @@
 <div align="center">
-<h1>SR-FD: Fréchet Distance Loss on Speech Representations for Text-to-Speech</h1>
+<h1>FDSpeech: Fréchet-Distance-Guided Few-Step Speech Synthesis</h1>
 
 **A training-time distributional regularizer for intelligible few-step TTS**
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv%3A2607.06027-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2607.06027)
-[![Model Card](https://img.shields.io/badge/Model-LoRA%20adapter-yellow?logo=huggingface)](MODEL_CARD.md)
+[![Model](https://img.shields.io/badge/Model-FDSpeech--VoxCPM2-yellow?logo=huggingface)](https://huggingface.co/voidful/FDSpeech-VoxCPM2)
 [![Hugging Face Space](https://img.shields.io/badge/Space-live%20comparison-orange?logo=huggingface)](https://huggingface.co/spaces/voidful/fd-speech-demo)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
@@ -12,29 +12,31 @@
 
 ## Overview
 
-**Speech Representation Fréchet Distance (SR-FD)** is a training-time
+**FDSpeech** is a four-step VoxCPM2 adapter and training recipe built around a
+Fréchet-distance loss on speech representations. It is a training-time
 distributional regularizer for tokenizer-free, few-step flow-matching TTS.
 Standard objectives such as conditional flow matching, reconstruction, and
 stop prediction supervise local behavior, but do not directly constrain the
 distribution of complete utterances produced by the low-step sampler.
 
-SR-FD operates on sampled speech. During fine-tuning, the model synthesizes an
+FDSpeech operates on sampled speech. During fine-tuning, the model synthesizes an
 utterance with the **same four-step sampler used at deployment**. Frozen
 Whisper and wav2vec 2.0 CTC encoders map that speech to content features, and a
 differentiable Fréchet distance matches their mean and covariance to offline
-reference statistics from three complementary targets. SR-FD needs **no
+reference statistics from three complementary targets. FDSpeech needs **no
 discriminator**, is removed after training, and adds **no inference-time
 parameters or computation**.
 
 > **Base model.** The experiments use the external tokenizer-free
 > flow-matching TTS model [`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2).
-> The released model artifact is a LoRA adapter for that base model, not a
-> standalone checkpoint.
+> The released artifact is the
+> [`voidful/FDSpeech-VoxCPM2`](https://huggingface.co/voidful/FDSpeech-VoxCPM2)
+> LoRA adapter for that base model, not a standalone checkpoint.
 
 ## Main result
 
 On the 1,088-prompt Seed-TTS English `test-en` set (11,805 reference words),
-four-step SR-FD fine-tuning improves the original four-step VoxCPM2 WER from
+four-step FDSpeech improves the original four-step VoxCPM2 WER from
 2.2279% to 1.4147%, a **36.5% relative reduction**, and also improves on the
 original ten-step baseline by **18.5% relative**.
 
@@ -42,14 +44,14 @@ original ten-step baseline by **18.5% relative**.
 |---|:---:|---:|---:|---:|
 | VoxCPM2 | 4 | 263/11805 = 2.2279% | 0.7433 | 3.2974 / 2.8950 / 3.5296 |
 | VoxCPM2 | 10 | 205/11805 = 1.7366% | 0.7610 | 3.8072 / 3.0866 / 3.6689 |
-| **VoxCPM2 + SR-FD (ours)** | **4** | **167/11805 = 1.4147%** | **0.7613** | **3.7637 / 3.0711 / 3.6507** |
+| **FDSpeech (ours)** | **4** | **167/11805 = 1.4147%** | **0.7613** | **3.7637 / 3.0711 / 3.6507** |
 | F5-TTS (reported) | 32 | 1.83% | – | – |
 | ARCHI-TTS (reported) | 32 | 1.47% | – | – |
 
 The two paired WER improvements are significant under utterance-level
 bootstrap. A blinded comparison against the ten-step baseline collected 229
 judgments from 13 listeners; the decisive preference split was near even
-(61 SR-FD vs. 67 ten-step), with equivalence supported under the paper's
+(61 FDSpeech vs. 67 ten-step), with equivalence supported under the paper's
 pre-specified 10-point margin. SIM, UTMOS, and DNSMOS are objective proxies,
 not human MOS. See the [paper](https://arxiv.org/abs/2607.06027) for confidence
 intervals, ablations, and the complete evaluation protocol.
@@ -63,7 +65,7 @@ intervals, ablations, and the complete evaluation protocol.
         ▼                         │
   ┌───────────────┐   gen   ┌─────────────┐   moments   ┌──────────────┐
   │ four-step     │ speech  │ frozen      │  μ_g, Σ_g   │ Fréchet      │
-  │ sampler       ├────────►│ extractors  ├────────────►│ distance     ├──► L_srfd
+  │ sampler       ├────────►│ extractors  ├────────────►│ distance     ├──► L_FD
   │ VoxCPM2+LoRA  │         │ Whisper, CTC│             │              │
   └───────────────┘         └─────────────┘             └──────▲───────┘
                                                                │ μ_r, Σ_r
@@ -90,11 +92,11 @@ integration points.
 
 | Artifact | Included | Notes |
 |---|:---:|---|
-| Differentiable SR-FD loss and moment utilities | Yes | `srfd/` |
+| Differentiable FD loss and moment utilities | Yes | `srfd/` compatibility namespace |
 | Frozen Whisper/CTC extractor wrappers | Yes | Heavy models download separately |
 | Paper-aligned three-target config | Yes | Paths are local placeholders |
 | Reference-statistics and evaluation scripts | Yes | External audio/benchmarks required |
-| Selected four-step LoRA adapter | Yes | `demo/model/`, used with VoxCPM2 |
+| Selected FDSpeech four-step LoRA adapter | Yes | Hosted as [`FDSpeech-VoxCPM2`](https://huggingface.co/voidful/FDSpeech-VoxCPM2) |
 | Aligned audio demo and result metadata | Yes | Ten prompts and seven systems |
 | VoxCPM2 source and base weights | No | Use the upstream release |
 | Training manifests, reference audio, and precomputed moments | No | Not redistributed |
@@ -107,15 +109,15 @@ training stack is bundled.
 
 ## Installation
 
-Python 3.10 or newer and PyTorch 2.5 or newer are required for the SR-FD
+Python 3.10 or newer and PyTorch 2.5 or newer are required for the FDSpeech
 package.
 
 ```bash
 git clone https://github.com/voidful/fd-speech.git
 cd fd-speech
 
-conda create -n srfd python=3.10 -y
-conda activate srfd
+conda create -n fdspeech python=3.10 -y
+conda activate fdspeech
 python -m pip install -U pip
 pip install -e ".[test]"
 ```
@@ -137,23 +139,34 @@ pip install -e ".[extractors]"
 
 ## Inference with the released adapter
 
-The bundled artifact at `demo/model/` is a LoRA adapter. A current VoxCPM
-installation can load the adapter directory together with the upstream
-VoxCPM2 base model. The first run downloads the 2B-parameter base checkpoint;
-a CUDA GPU is recommended.
+[`voidful/FDSpeech-VoxCPM2`](https://huggingface.co/voidful/FDSpeech-VoxCPM2)
+is a LoRA adapter. A current VoxCPM installation can download it and load it
+together with the upstream VoxCPM2 base model. The first run downloads the
+2B-parameter base checkpoint; a CUDA GPU is recommended.
 
 ```bash
-pip install -U voxcpm soundfile
+pip install -U voxcpm huggingface_hub soundfile
 ```
 
 ```python
+import json
+import os
+
 import soundfile as sf
+from huggingface_hub import snapshot_download
 from voxcpm import VoxCPM
+from voxcpm.model.voxcpm import LoRAConfig
+
+adapter_dir = snapshot_download("voidful/FDSpeech-VoxCPM2")
+with open(os.path.join(adapter_dir, "lora_config.json"), encoding="utf-8") as handle:
+    adapter_info = json.load(handle)
 
 model = VoxCPM.from_pretrained(
-    "openbmb/VoxCPM2",
+    hf_model_id="openbmb/VoxCPM2",
     load_denoiser=False,
-    lora_weights_path="demo/model",
+    optimize=True,
+    lora_config=LoRAConfig(**adapter_info["lora_config"]),
+    lora_weights_path=adapter_dir,
 )
 
 wav = model.generate(
@@ -164,14 +177,14 @@ wav = model.generate(
     denoise=False,
     seed=0,
 )
-sf.write("srfd.wav", wav, model.tts_model.sample_rate)
+sf.write("fdspeech.wav", wav, model.tts_model.sample_rate)
 ```
 
 For voice cloning, also pass `prompt_wav_path` and its exact `prompt_text` as
 described by the [VoxCPM documentation](https://github.com/OpenBMB/VoxCPM).
 Read the [model card](MODEL_CARD.md) before deployment.
 
-## FD post-training and reproduction
+## FDSpeech post-training and reproduction
 
 ### 1. Prepare reference manifests
 
@@ -210,12 +223,16 @@ python scripts/compute_reference_stats.py \
 
 The base training step must expose a differentiable four-step sampler, decode
 the generated latent to waveform, apply the duration gate, and add
-`lambda_srfd * loss/srfd` to the existing objective. The public API and a
+the configured FD-loss term to the existing objective. The public API and a
 training-step sketch are in [docs/integration.md](docs/integration.md).
 
 The paper recipe first performs supervised LoRA adaptation, then runs 1,600
-additional SR-FD steps using [configs/srfd_compact3.yaml](configs/srfd_compact3.yaml).
+additional FDSpeech steps using [configs/srfd_compact3.yaml](configs/srfd_compact3.yaml).
 The pretrained base weights remain frozen.
+
+The existing `srfd` package, config block, and `loss/srfd` metric key are kept
+as compatibility identifiers for released checkpoints and training logs. New
+Python code can import the public aliases from `fdspeech`.
 
 ## Evaluation
 
@@ -232,25 +249,25 @@ quality proxies, and paired significance:
 
 ```bash
 python scripts/score_seed_tts_eval.py \
-  --listing runs/srfd/wav_res_ref_text \
-  --out_json runs/srfd/metrics.json --lang en
+  --listing runs/fdspeech/wav_res_ref_text \
+  --out_json runs/fdspeech/metrics.json --lang en
 
 python scripts/score_utmos_objective.py \
-  --audio_dir runs/srfd/wav --out_json runs/srfd/utmos.json
+  --audio_dir runs/fdspeech/wav --out_json runs/fdspeech/utmos.json
 
 python scripts/score_speechmos_dnsmos.py \
-  --wav_dir runs/srfd/wav --out_json runs/srfd/dnsmos.json
+  --wav_dir runs/fdspeech/wav --out_json runs/fdspeech/dnsmos.json
 
 python scripts/paired_bootstrap.py \
   --a runs/base4/per_utt_wer.jsonl \
-  --b runs/srfd/per_utt_wer.jsonl --metric wer
+  --b runs/fdspeech/per_utt_wer.jsonl --metric wer
 ```
 
 ## Audio demo
 
 The [Hugging Face Space](https://huggingface.co/spaces/voidful/fd-speech-demo)
 provides a three-column, same-prompt comparison of the original VoxCPM2 at
-four and ten steps and SR-FD at four steps. It includes ASR transcript diffs,
+four and ten steps and FDSpeech at four steps. It includes ASR transcript diffs,
 per-sample WER, benchmark results, prompt/reference audio, and deliberately
 surfaced negative cases. The Space serves checked-in aligned audio, so it runs
 on CPU hardware without loading three 2B-parameter systems.
@@ -275,7 +292,8 @@ metadata.
 ## Repository layout
 
 ```text
-srfd/                         SR-FD loss, extractors, moments, statistics I/O
+fdspeech/                     canonical public import aliases
+srfd/                         compatibility implementation namespace
 configs/srfd_compact3.yaml    paper main configuration
 scripts/                      reference-statistics and evaluation utilities
 experiments/                  CPU-only synthetic validation
@@ -289,7 +307,7 @@ MODEL_CARD.md                 model scope, metrics, limitations, and usage
 
 ## Limitations and responsible use
 
-SR-FD was evaluated as an **English intelligibility regularizer** for a
+FDSpeech was evaluated as an **English intelligibility regularizer** for a
 four-step VoxCPM2 setting. The paper does not establish improvements for every
 language, base model, sampler, perceptual attribute, or prompt. Lower
 representation FD is not a reliable standalone model-selection metric, and
@@ -301,7 +319,7 @@ audio.
 
 ## License
 
-The SR-FD code and bundled adapter are released under
+The FDSpeech code and adapter are released under
 [Apache-2.0](LICENSE). VoxCPM2, pretrained extractors, datasets, and evaluation
 tools remain subject to their respective licenses and terms.
 
@@ -315,10 +333,10 @@ and the training/reference recipe uses LibriTTS-derived voice-cloning material.
 
 ## Citation
 
-If you find SR-FD useful, please cite:
+If you find FDSpeech useful, please cite:
 
 ```bibtex
-@article{chung2026srfd,
+@article{chung2026fdspeech,
   title   = {Fr\'{e}chet Distance Loss on Speech Representations for Text-to-Speech Synthesis},
   author  = {Chung, Ho-Lam and Huang, Kuan-Po and Lu, Bo-Ru and Lee, Hung-yi},
   journal = {arXiv preprint arXiv:2607.06027},

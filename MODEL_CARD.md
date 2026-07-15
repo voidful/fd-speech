@@ -11,19 +11,21 @@ tags:
   - frechet-distance
   - few-step-generation
   - lora
+  - fdspeech
 ---
 
-# SR-FD VoxCPM2 LoRA adapter
+# FDSpeech-VoxCPM2
 
-This model artifact is the selected compact three-target **Speech
-Representation Fréchet Distance (SR-FD)** LoRA adapter from the paper
+**FDSpeech-VoxCPM2** is the selected compact three-target LoRA adapter from the paper
 [Fréchet Distance Loss on Speech Representations for Text-to-Speech
-Synthesis](https://arxiv.org/abs/2607.06027).
+Synthesis](https://arxiv.org/abs/2607.06027). It is trained with a
+Fréchet-distance loss on speech representations for intelligible four-step
+generation.
 
 It is **not a standalone TTS checkpoint**. Use it with the external
-[`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2) base model. SR-FD
-is used only during fine-tuning; inference is the ordinary four-step base model
-with the LoRA adapter loaded.
+[`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2) base model. The FD
+loss is used only during fine-tuning; inference is the ordinary four-step base
+model with the LoRA adapter loaded.
 
 ## Model details
 
@@ -32,37 +34,50 @@ with the LoRA adapter loaded.
 - **Adapter:** rank 32, alpha 32, q/k/v/o projections in the language model and DiT
 - **Inference sampler:** four Euler steps, CFG 2.35 in the paper evaluation
 - **Selected checkpoint:** `srfd_compact3/step_0001600`
-- **SR-FD targets:** low-step Whisper anchor, ten-step teacher CTC, real-speech CTC
+- **FDSpeech targets:** low-step Whisper anchor, ten-step teacher CTC, real-speech CTC
 - **Primary evaluation:** Seed-TTS English `test-en`
 
 ## Files
 
 ```text
-demo/model/
-  lora_config.json
-  lora_weights.safetensors
-  selected_checkpoint.json
-  training_state.json
+lora_config.json
+lora_weights.safetensors
+training_state.json
+adapters/compact3_balanced/
+ablations/
+configs/
+reports/
 ```
 
-Optimizer, scheduler, reference statistics, and SR-FD feature-queue state are
+Optimizer, scheduler, reference statistics, and FD-loss feature-queue state are
 not included because they are not needed for inference. Base-model weights are
 downloaded separately.
 
 ## Usage
 
 ```bash
-pip install -U voxcpm soundfile
+pip install -U voxcpm huggingface_hub soundfile
 ```
 
 ```python
+import json
+import os
+
 import soundfile as sf
+from huggingface_hub import snapshot_download
 from voxcpm import VoxCPM
+from voxcpm.model.voxcpm import LoRAConfig
+
+adapter_dir = snapshot_download("voidful/FDSpeech-VoxCPM2")
+with open(os.path.join(adapter_dir, "lora_config.json"), encoding="utf-8") as handle:
+    adapter_info = json.load(handle)
 
 model = VoxCPM.from_pretrained(
-    "openbmb/VoxCPM2",
+    hf_model_id="openbmb/VoxCPM2",
     load_denoiser=False,
-    lora_weights_path="demo/model",
+    optimize=True,
+    lora_config=LoRAConfig(**adapter_info["lora_config"]),
+    lora_weights_path=adapter_dir,
 )
 
 wav = model.generate(
@@ -73,7 +88,7 @@ wav = model.generate(
     denoise=False,
     seed=0,
 )
-sf.write("srfd.wav", wav, model.tts_model.sample_rate)
+sf.write("fdspeech.wav", wav, model.tts_model.sample_rate)
 ```
 
 The first run downloads the base model. A CUDA GPU is recommended. For
@@ -83,13 +98,16 @@ exact `prompt_text`.
 ## Training data and reference statistics
 
 The paper fine-tunes on a 767-row manifest derived from LibriTTS voice-cloning
-material. Offline SR-FD moments are computed from ASR-verified four-step
+material. Offline FDSpeech reference moments are computed from ASR-verified four-step
 generations, ten-step teacher generations, and real LibriTTS speech. The
 training manifest, source/reference audio, and precomputed moments are not
 redistributed in this repository.
 
-See [configs/srfd_compact3.yaml](configs/srfd_compact3.yaml) for the released
-recipe and [docs/integration.md](docs/integration.md) for integration details.
+See the [training config](https://github.com/voidful/fd-speech/blob/main/configs/srfd_compact3.yaml)
+for the released recipe and the
+[integration guide](https://github.com/voidful/fd-speech/blob/main/docs/integration.md)
+for implementation details. The `srfd` path and config key are retained as
+compatibility identifiers for the released training artifacts.
 
 ## Evaluation
 
@@ -100,7 +118,7 @@ reference words.
 |---|:---:|---:|---:|---:|
 | VoxCPM2 | 4 | 263/11805 = 2.2279% | 0.7433 | 3.2974 / 2.8950 / 3.5296 |
 | VoxCPM2 | 10 | 205/11805 = 1.7366% | 0.7610 | 3.8072 / 3.0866 / 3.6689 |
-| **VoxCPM2 + SR-FD** | **4** | **167/11805 = 1.4147%** | **0.7613** | **3.7637 / 3.0711 / 3.6507** |
+| **FDSpeech-VoxCPM2** | **4** | **167/11805 = 1.4147%** | **0.7613** | **3.7637 / 3.0711 / 3.6507** |
 
 The WER reductions against both original baselines are significant under an
 utterance-level paired bootstrap. SIM, UTMOS, and DNSMOS are objective proxies,
@@ -118,21 +136,21 @@ confidence intervals.
 ## Limitations and risks
 
 - Evidence is concentrated on English Seed-TTS; multilingual gains are not established.
-- SR-FD primarily targets intelligibility and is not a general perceptual-quality objective.
+- FDSpeech primarily targets intelligibility and is not a general perceptual-quality objective.
 - Aggregate WER improves, but individual prompts can still regress or contain substitutions.
 - Raw representation FD should not be used as a standalone quality or checkpoint-selection metric.
 - Voice cloning can enable impersonation and fraud. Use only consented voices, label synthetic audio, and do not use it for identity or access-control bypass.
 
 ## License
 
-The adapter and SR-FD code are released under Apache-2.0. The base model,
+The adapter and FDSpeech code are released under Apache-2.0. The base model,
 pretrained extractors, datasets, and evaluation tools remain subject to their
 own terms.
 
 ## Citation
 
 ```bibtex
-@article{chung2026srfd,
+@article{chung2026fdspeech,
   title   = {Fr\'{e}chet Distance Loss on Speech Representations for Text-to-Speech Synthesis},
   author  = {Chung, Ho-Lam and Huang, Kuan-Po and Lu, Bo-Ru and Lee, Hung-yi},
   journal = {arXiv preprint arXiv:2607.06027},

@@ -1,4 +1,4 @@
-"""Condition keys for conditional SR-FD/CFS-FD statistics."""
+"""Condition keys for conditional FDSpeech/CFS-FD statistics."""
 
 from __future__ import annotations
 

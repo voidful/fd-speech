@@ -1,4 +1,4 @@
-"""Hugging Face Space for aligned SR-FD listening comparisons.
+"""Hugging Face Space for aligned FDSpeech listening comparisons.
 
 This Space intentionally serves the paper's checked-in audio instead of
 loading three 2B-parameter model variants. Every column therefore uses the
@@ -103,19 +103,19 @@ def _insight(sample: dict) -> str:
     ours = wers["srfd3"]
     best_baseline = min(wers["base4"], wers["base10"])
     if ours == 0 and best_baseline > 0:
-        title = "SR-FD recovers the target text"
-        body = "The four-step SR-FD output has an exact ASR match while both original samplers retain a content error."
+        title = "FDSpeech recovers the target text"
+        body = "The four-step FDSpeech output has an exact ASR match while both original samplers retain a content error."
         tone = "positive"
     elif ours == 0 and wers["base4"] > 0:
-        title = "SR-FD closes the four-to-ten-step gap"
-        body = "SR-FD fixes the original four-step error and matches the stronger ten-step baseline on this prompt."
+        title = "FDSpeech closes the four-to-ten-step gap"
+        body = "FDSpeech fixes the original four-step error and matches the stronger ten-step baseline on this prompt."
         tone = "positive"
     elif ours < best_baseline:
-        title = "SR-FD reduces this prompt's error"
-        body = "The SR-FD transcript has lower per-utterance WER than both original sampling settings."
+        title = "FDSpeech reduces this prompt's error"
+        body = "The FDSpeech transcript has lower per-utterance WER than both original sampling settings."
         tone = "positive"
     elif ours > best_baseline:
-        title = "A remaining SR-FD failure"
+        title = "A remaining FDSpeech failure"
         body = "This deliberately surfaced negative case shows that aggregate WER improves, but individual prompts can regress."
         tone = "negative"
     else:
@@ -224,7 +224,7 @@ RESULTS_TABLE = """
     <tbody>
       <tr><td>VoxCPM2</td><td>4</td><td>263 / 11805</td><td>2.2279%</td><td>0.7433</td><td>3.2974</td><td>2.8950</td><td>3.5296</td></tr>
       <tr><td>VoxCPM2</td><td>10</td><td>205 / 11805</td><td>1.7366%</td><td>0.7610</td><td>3.8072</td><td>3.0866</td><td>3.6689</td></tr>
-      <tr class="ours-row"><td>VoxCPM2 + SR-FD</td><td>4</td><td>167 / 11805</td><td><strong>1.4147%</strong></td><td>0.7613</td><td>3.7637</td><td>3.0711</td><td>3.6507</td></tr>
+      <tr class="ours-row"><td>FDSpeech</td><td>4</td><td>167 / 11805</td><td><strong>1.4147%</strong></td><td>0.7613</td><td>3.7637</td><td>3.0711</td><td>3.6507</td></tr>
     </tbody>
   </table>
 </div>
@@ -232,16 +232,17 @@ RESULTS_TABLE = """
 
 HERO = """
 <section class="hero">
-  <div class="hero-kicker">Speech Representation Fréchet Distance</div>
+  <div class="hero-kicker">FDSpeech · Fréchet Distance Loss</div>
   <h1>Hear what changes at four steps.</h1>
-  <p>Aligned Seed-TTS English comparisons between the original VoxCPM2 at 4 and 10 steps and our SR-FD model at 4 steps.</p>
+  <p>Aligned Seed-TTS English comparisons between the original VoxCPM2 at 4 and 10 steps and FDSpeech at 4 steps.</p>
   <div class="hero-links">
     <a href="https://arxiv.org/abs/2607.06027" target="_blank">Paper ↗</a>
+    <a href="https://huggingface.co/voidful/FDSpeech-VoxCPM2" target="_blank">Model ↗</a>
     <a href="https://github.com/voidful/fd-speech" target="_blank">Code ↗</a>
     <a href="https://huggingface.co/openbmb/VoxCPM2" target="_blank">Base model ↗</a>
   </div>
   <div class="hero-stats">
-    <div><strong>1.4147%</strong><span>SR-FD 4-step WER</span></div>
+    <div><strong>1.4147%</strong><span>FDSpeech 4-step WER</span></div>
     <div><strong>−36.5%</strong><span>relative vs. base 4-step</span></div>
     <div><strong>−18.5%</strong><span>relative vs. base 10-step</span></div>
     <div><strong>0</strong><span>added inference-time modules</span></div>
@@ -332,7 +333,7 @@ CSS = """
 THEME = gr.themes.Soft(primary_hue="indigo", neutral_hue="slate")
 
 with gr.Blocks(
-    title="SR-FD · Four-step TTS comparison",
+    title="FDSpeech · Four-step TTS comparison",
     analytics_enabled=False,
 ) as demo:
     gr.HTML(HERO)
@@ -375,8 +376,8 @@ with gr.Blocks(
                             base10_transcript = gr.HTML(INITIAL[8])
                         with gr.Column(min_width=235):
                             gr.HTML(_system_header("srfd3", "ours", "Ours · same four-step budget"))
-                            srfd_audio = gr.Audio(value=INITIAL[9], label="SR-FD · 4 steps", interactive=False)
-                            srfd_transcript = gr.HTML(INITIAL[10])
+                            fdspeech_audio = gr.Audio(value=INITIAL[9], label="FDSpeech · 4 steps", interactive=False)
+                            fdspeech_transcript = gr.HTML(INITIAL[10])
 
             compare_outputs = [
                 case_meta,
@@ -388,8 +389,8 @@ with gr.Blocks(
                 base4_transcript,
                 base10_audio,
                 base10_transcript,
-                srfd_audio,
-                srfd_transcript,
+                fdspeech_audio,
+                fdspeech_transcript,
             ]
             navigation_outputs = [picker, *compare_outputs]
             picker.change(render_sample, inputs=picker, outputs=compare_outputs)
@@ -404,7 +405,7 @@ with gr.Blocks(
                 <div class="metric-band">
                   <div><strong>2.2279%</strong><span>Original VoxCPM2 · 4 steps</span></div>
                   <div><strong>1.7366%</strong><span>Original VoxCPM2 · 10 steps</span></div>
-                  <div><strong>1.4147%</strong><span>VoxCPM2 + SR-FD · 4 steps</span></div>
+                  <div><strong>1.4147%</strong><span>FDSpeech · 4 steps</span></div>
                 </div>
                 """
             )
@@ -413,7 +414,7 @@ with gr.Blocks(
                 """
 ### What the aggregate result says
 
-- Four-step SR-FD reduces WER by **36.5% relative** to the original four-step sampler and **18.5% relative** to the original ten-step sampler.
+- FDSpeech reduces WER by **36.5% relative** to the original four-step sampler and **18.5% relative** to the original ten-step sampler.
 - Both WER differences are supported by utterance-level paired bootstrap tests.
 - Speaker similarity and objective quality proxies return to approximately the ten-step level.
 - In a blinded test with 13 listeners and 229 judgments, the decisive split was 61 vs. 67; equivalence was supported within the pre-specified 10-point margin.
@@ -422,7 +423,7 @@ SIM, UTMOS, and DNSMOS are objective proxies, not human MOS. Reported values and
                 """
             )
 
-        with gr.Tab("How SR-FD works", id="method"):
+        with gr.Tab("How FDSpeech works", id="method"):
             gr.HTML(
                 """
                 <div class="method-flow">
@@ -436,7 +437,7 @@ SIM, UTMOS, and DNSMOS are objective proxies, not human MOS. Reported values and
             )
             gr.Markdown(
                 """
-SR-FD matches complete **sampled speech**, using the same four-step sampler used at deployment. The reference mixture combines:
+FDSpeech matches complete **sampled speech**, using the same four-step sampler used at deployment. The reference mixture combines:
 
 1. an ASR-verified four-step **Whisper anchor**,
 2. a ten-step teacher **CTC target**, and
@@ -453,15 +454,26 @@ This demo uses checked-in, aligned audio rather than live synthesis. That design
                 """
 ### Released artifact
 
-The repository includes the selected compact three-target LoRA adapter at `demo/model/`. It is **not** a standalone model and must be loaded with [`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2).
+The released [`voidful/FDSpeech-VoxCPM2`](https://huggingface.co/voidful/FDSpeech-VoxCPM2) artifact is a compact three-target LoRA adapter. It is **not** a standalone model and must be loaded with [`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2).
 
 ```python
+import json
+import os
+
+from huggingface_hub import snapshot_download
 from voxcpm import VoxCPM
+from voxcpm.model.voxcpm import LoRAConfig
+
+adapter_dir = snapshot_download("voidful/FDSpeech-VoxCPM2")
+with open(os.path.join(adapter_dir, "lora_config.json"), encoding="utf-8") as handle:
+    adapter_info = json.load(handle)
 
 model = VoxCPM.from_pretrained(
-    "openbmb/VoxCPM2",
+    hf_model_id="openbmb/VoxCPM2",
     load_denoiser=False,
-    lora_weights_path="demo/model",
+    optimize=True,
+    lora_config=LoRAConfig(**adapter_info["lora_config"]),
+    lora_weights_path=adapter_dir,
 )
 wav = model.generate(
     text="The quick brown fox jumps over the lazy dog.",
@@ -474,7 +486,7 @@ wav = model.generate(
 ### Citation
 
 ```bibtex
-@article{chung2026srfd,
+@article{chung2026fdspeech,
   title   = {Fr\\'{e}chet Distance Loss on Speech Representations for Text-to-Speech Synthesis},
   author  = {Chung, Ho-Lam and Huang, Kuan-Po and Lu, Bo-Ru and Lee, Hung-yi},
   journal = {arXiv preprint arXiv:2607.06027},

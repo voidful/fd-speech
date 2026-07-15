@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Compute SR-FD reference statistics from an audio manifest.
+"""Compute FDSpeech reference statistics from an audio manifest.
 
-This runs the *frozen* SR-FD extractors directly on reference waveforms and
+This runs the *frozen* FDSpeech extractors directly on reference waveforms and
 stores only the first- and second-order moments (mean + covariance) of the
 resulting feature vectors. The reference audio is never used again at training
 time; only the stored moments are loaded.
@@ -49,7 +49,7 @@ from srfd.stats_io import save_stats
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Compute SR-FD reference statistics.")
+    p = argparse.ArgumentParser(description="Compute FDSpeech reference statistics.")
     p.add_argument("--manifest", required=True, help="JSONL manifest with an 'audio' field.")
     p.add_argument("--config", required=True, help="YAML config; reads srfd.reps for extractors.")
     p.add_argument("--out", required=True, help="Output .pt path.")
@@ -196,7 +196,7 @@ def main() -> int:
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     save_stats(str(out_path), {"reps": reps_out, "metadata": metadata})
-    print(f"Saved SR-FD reference stats to {out_path}", file=sys.stderr)
+    print(f"Saved FDSpeech reference stats to {out_path}", file=sys.stderr)
     return 0
 
 

@@ -1,16 +1,16 @@
 # =============================================================================
-# SR-FD compact three-target fine-tuning config (paper main model).
+# FDSpeech compact three-target fine-tuning config (paper main model).
 #
-# This is the configuration of the four-step SR-FD model reported in the paper
+# This is the configuration of the four-step FDSpeech model reported in the paper
 # (the step-1600 three-target run, 167/11805 upstream Seed-TTS English errors).
 # The base model is the external, tokenizer-free flow-matching TTS model
-# VoxCPM2 (openbmb/VoxCPM2); SR-FD is added as one extra training loss on top
+# VoxCPM2 (openbmb/VoxCPM2); the FD loss is added as one extra training loss on top
 # of LoRA fine-tuning. See docs/integration.md for how `loss/srfd` is wired
 # into the training step.
 #
 # Stage 2 (this file) is a small residual refinement: starting from a
 # supervised LoRA adaptation (`init_lora_path`), it runs 1600 further steps
-# with SR-FD enabled.
+# with FDSpeech enabled.
 # =============================================================================
 
 seed: 42
@@ -76,7 +76,7 @@ lambdas:
   loss/whisper_text: 1.0e-05    # inherited aux
 
 # ===========================================================================
-# SR-FD (this paper's contribution)
+# FDSpeech FD loss (this paper's contribution)
 # ===========================================================================
 srfd:
   enabled: true

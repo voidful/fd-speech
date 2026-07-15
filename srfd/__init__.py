@@ -1,6 +1,6 @@
-"""Speech Representation Fréchet Distance (SR-FD) loss.
+"""Compatibility implementation for the FDSpeech FD loss.
 
-SR-FD is a training-time distributional regularizer for tokenizer-free
+FDSpeech is a training-time distributional regularizer for tokenizer-free
 few-step flow-matching TTS. During fine-tuning the model synthesizes speech
 with the same few-step sampler used at deployment; frozen Whisper and CTC
 encoders map that speech to feature vectors whose mean and covariance are

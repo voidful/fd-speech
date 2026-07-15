@@ -65,7 +65,7 @@ def test_queue_loss_reduces_fd_and_moves_generator():
         normalize=True,
         warmup_steps=0,
     )
-    # Affine generator z @ W^T + b parameterizes a Gaussian, so SR-FD can drive
+    # Affine generator z @ W^T + b parameterizes a Gaussian, so FDSpeech can drive
     # both its mean (b) and covariance (W W^T) toward the reference.
     W = torch.eye(6) * 0.3 + 0.01 * torch.randn(6, 6)
     W.requires_grad_(True)

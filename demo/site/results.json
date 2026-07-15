@@ -47,7 +47,7 @@
       "note": "Strict matched no-FD fine-tuning control."
     },
     {
-      "name": "FT + SR-FD",
+      "name": "FDSpeech",
       "steps": "4",
       "ft": true,
       "srfd": true,
@@ -58,7 +58,7 @@
       "dnsmos_ovrl": 3.0711,
       "dnsmos_p808": 3.6507,
       "highlight": true,
-      "note": "Packaged demo adapter: balanced compact 3-target SR-FD, step 1600."
+      "note": "Packaged FDSpeech adapter: balanced compact 3-target FD loss, step 1600."
     },
     {
       "name": "ARCHI-TTS reported",

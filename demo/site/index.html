@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SRFD-VoxCPM2 Demo</title>
+    <title>FDSpeech-VoxCPM2 Demo</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <header class="topbar">
       <div>
         <p class="eyebrow">Tokenizer-free few-step TTS</p>
-        <h1>SRFD-VoxCPM2</h1>
+        <h1>FDSpeech-VoxCPM2</h1>
       </div>
       <nav aria-label="Sections">
         <a href="#audio">Audio</a>
@@ -29,7 +29,7 @@
             <span>263 / 11805</span>
           </div>
           <div class="metric primary">
-            <span class="label">SR-FD 4-step WER</span>
+            <span class="label">FDSpeech 4-step WER</span>
             <strong>1.4147%</strong>
             <span>167 / 11805</span>
           </div>
@@ -51,7 +51,7 @@
           <h2>Aligned Audio Examples</h2>
           <p>
             Each row uses the same Seed-TTS English prompt across baselines, matched fine-tuning,
-            SR-FD, and compact three-target ablations. The prompt reference audio, target
+            FDSpeech, and compact three-target ablations. The prompt reference audio, target
             reference audio, reference transcript, ASR transcript, and per-utterance WER are
             shown for every model so both zero-WER successes and negative cases can be checked
             directly.
@@ -77,7 +77,7 @@
                 <th>System</th>
                 <th>Steps</th>
                 <th>FT</th>
-                <th>SR-FD</th>
+                <th>FDSpeech</th>
                 <th>Upstream WER</th>
                 <th>UTMOS / DNSMOS OVRL / P808</th>
               </tr>
@@ -106,19 +106,30 @@
           <p>
             This repository packages a LoRA adapter for <code>openbmb/VoxCPM2</code>.
             It is not a standalone full model. The included adapter is the
-            compact 3-target SR-FD balanced checkpoint at step 1600, selected by
+            compact 3-target FDSpeech checkpoint at step 1600, selected by
             full upstream Seed-TTS English WER.
           </p>
         </div>
-        <pre class="code"><code>from voxcpm import VoxCPM
+        <pre class="code"><code>import json
+import os
+
+from huggingface_hub import snapshot_download
+from voxcpm import VoxCPM
+from voxcpm.model.voxcpm import LoRAConfig
+
+adapter_dir = snapshot_download("voidful/FDSpeech-VoxCPM2")
+with open(os.path.join(adapter_dir, "lora_config.json"), encoding="utf-8") as handle:
+    adapter_info = json.load(handle)
 
 model = VoxCPM.from_pretrained(
-    "openbmb/VoxCPM2",
+    hf_model_id="openbmb/VoxCPM2",
     load_denoiser=False,
-    lora_weights_path="demo/model",
+    optimize=True,
+    lora_config=LoRAConfig(**adapter_info["lora_config"]),
+    lora_weights_path=adapter_dir,
 )
 wav = model.generate(
-    text="SR-FD improves true four-step VoxCPM2 synthesis.",
+    text="FDSpeech improves true four-step VoxCPM2 synthesis.",
     cfg_value=2.35,
     inference_timesteps=4,
     seed=0,

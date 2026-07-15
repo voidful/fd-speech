@@ -1,4 +1,4 @@
-"""Differentiable moment utilities for SR-FD.
+"""Differentiable moment utilities for FDSpeech.
 
 All functions force fp32 internally so that statistics are not corrupted by
 bf16 accumulation. Mask-aware helpers ignore padded frames so they do not

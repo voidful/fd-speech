@@ -1,6 +1,6 @@
-# SR-FD: Method
+# FDSpeech: Method
 
-SR-FD (Speech Representation Fréchet Distance loss) is one extra training loss
+FDSpeech uses a Fréchet-distance loss on speech representations as one extra training loss
 added to a standard few-step TTS fine-tuning recipe. During fine-tuning, the
 model synthesizes speech with the **same few-step sampler used at deployment**,
 and frozen speech encoders turn the generated audio into feature vectors. Each
@@ -24,7 +24,7 @@ L_fm = E ‖ u_θ(y, t) − v ‖²
 ```
 
 At inference the decoder integrates the velocity field with a few Euler steps;
-with only four steps the integration is very coarse — exactly the regime SR-FD
+with only four steps the integration is very coarse — exactly the regime FDSpeech
 targets. The full fine-tuning objective is
 
 ```
@@ -33,13 +33,13 @@ L = w_fm · L_fm + w_stop · L_stop + L_aux + λ_srfd · L_srfd
 
 `L_stop` is a stop-prediction loss; `L_aux` collects three small auxiliary
 losses inherited from the underlying recipe (teacher-endpoint, preference-
-feature, Whisper-text) with fixed small weights. **SR-FD is the `L_srfd` term.**
+feature, Whisper-text) with fixed small weights. **FDSpeech uses the `L_srfd` compatibility term.**
 
 ## 2. Matching the sampled-speech distribution
 
 Standard fine-tuning supervises teacher-forced frames, so the few-step sampler
 never appears in the loss and training can look healthy while the four-step
-sampler drifts. SR-FD operates directly on sampled speech: during each update
+sampler drifts. FDSpeech operates directly on sampled speech: during each update
 the model synthesizes a complete short utterance with the deployment-time
 four-step sampler, keeping the computation differentiable (see
 [integration.md](integration.md)). Each frozen extractor `φ_k` maps the
@@ -83,9 +83,9 @@ detached; only the current mini-batch keeps gradient — a large-sample moment
 estimate at the memory cost of a single batch. (`srfd/loss.py::SRFDEmaLoss`,
 `stats_mode="queue"`.)
 
-## 5. The SR-FD loss
+## 5. The FDSpeech FD loss
 
-For each extractor `k` and target `j`, SR-FD computes a Fréchet distance
+For each extractor `k` and target `j`, FDSpeech computes a Fréchet distance
 between the generated and reference Gaussian moment estimates
 (`srfd/frechet.py`):
 
@@ -127,7 +127,7 @@ training; 1600 fine-tuning steps with AdamW (weight decay 0.01, grad-norm clip
 
 ## 7. Is the Fréchet distance a good diagnostic?
 
-No. SR-FD trains the model to reduce representation FD, but a smaller raw FD
+No. FDSpeech trains the model to reduce representation FD, but a smaller raw FD
 does not imply lower WER: across saved checkpoints the correlation between raw
 FD and WER is weak, and an external CTC FD pass confirms training moves
 generated features toward the reference while the raw value does not track WER.

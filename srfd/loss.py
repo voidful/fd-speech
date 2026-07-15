@@ -1,4 +1,4 @@
-"""SR-FD EMA/queue loss for trainer-side use.
+"""FDSpeech EMA/queue FD loss for trainer-side use.
 
 Behaviour summary:
 
@@ -17,9 +17,9 @@ Important:
 
 * Pass ``beta`` close to ``1.0`` (e.g. ``0.999``) to track a smooth estimate
   of the generator distribution rather than the per-batch one.
-* Set ``warmup_steps`` to skip SR-FD until the rest of the training loop has
+* Set ``warmup_steps`` to skip FDSpeech until the rest of the training loop has
   stabilized. During warmup the loss returns zero and the EMA is not updated.
-* ``every_n_steps`` lets you cut SR-FD frequency to save compute; the loss is
+* ``every_n_steps`` lets you cut FDSpeech frequency to save compute; the loss is
   zero on inactive steps.
 """
 
@@ -726,7 +726,7 @@ class SRFDEmaLoss(nn.Module):
         device: Optional[torch.device] = None,
     ) -> Dict[str, torch.Tensor]:
         # Pick a device/dtype anchor from the input so zero losses come out on
-        # the right device when SR-FD is inactive.
+        # the right device when FDSpeech is inactive.
         anchor = None
         for v in batch.values():
             if isinstance(v, torch.Tensor):

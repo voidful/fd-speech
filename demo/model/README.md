@@ -1,6 +1,6 @@
 # Model Adapter
 
-This directory contains the selected compact 3-target SR-FD LoRA adapter.
+This directory contains the selected compact 3-target FDSpeech LoRA adapter.
 
 Included files:
 
@@ -26,5 +26,5 @@ Selected checkpoint:
 - UTMOS / DNSMOS OVRL / P808: `3.7637 / 3.0711 / 3.6507`
 - Base model: `openbmb/VoxCPM2`
 
-Optimizer, scheduler, and SR-FD queue state are intentionally excluded from this
+Optimizer, scheduler, and FD-loss queue state are intentionally excluded from this
 demo model bundle because they are not needed for inference.

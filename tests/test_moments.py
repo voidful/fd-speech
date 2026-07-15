@@ -1,4 +1,4 @@
-"""Tests for SR-FD moment utilities."""
+"""Tests for FDSpeech moment utilities."""
 
 from __future__ import annotations
 

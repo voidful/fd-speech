@@ -1,6 +1,6 @@
-"""Representation extractors for SR-FD.
+"""Representation extractors for FDSpeech.
 
-The final SR-FD configuration uses two frozen, content-sensitive extractors:
+The final FDSpeech configuration uses two frozen, content-sensitive extractors:
 
 * ``WhisperEncoderAnchorExtractor`` — a frozen Whisper encoder pooled into a
   fixed utterance-level vector via soft time anchors, giving a semantic /
@@ -311,7 +311,7 @@ class CTCBlankStatsExtractor(BaseSRFDExtractor):
 class CTCPosteriorContentStatsExtractor(CTCBlankStatsExtractor):
     """Frozen CTC posterior content statistics.
 
-    ``CTCBlankStatsExtractor`` mainly tells SR-FD whether the generated speech
+    ``CTCBlankStatsExtractor`` mainly tells FDSpeech whether the generated speech
     has plausible blank/non-blank timing. This variant adds a deterministic
     random projection of non-blank posterior probabilities, so lexical/content
     substitutions are visible to the Fréchet term without exploding covariance
@@ -423,10 +423,10 @@ class CTCPosteriorContentStatsExtractor(CTCBlankStatsExtractor):
 # Whisper encoder extractors (semantic / ASR-sensitive space)
 # --------------------------------------------------------------------------- #
 class WhisperEncoderMeanStdExtractor(BaseSRFDExtractor):
-    """Frozen Whisper encoder embedding extractor for ASR-sensitive SR-FD.
+    """Frozen Whisper encoder embedding extractor for ASR-sensitive FDSpeech.
 
     Whisper encoder features are close to ASR content, so matching their
-    utterance statistics gives SR-FD a content-sensitive signal while keeping
+    utterance statistics gives FDSpeech a content-sensitive signal while keeping
     the encoder frozen.
     """
 
@@ -692,7 +692,7 @@ def build_srfd_extractors(
             continue
         if cfg.type not in _EXTRACTOR_REGISTRY:
             raise KeyError(
-                f"Unknown SR-FD extractor type '{cfg.type}'. "
+                f"Unknown FDSpeech extractor type '{cfg.type}'. "
                 f"Registered types: {sorted(_EXTRACTOR_REGISTRY.keys())}"
             )
         extractor_cls = _EXTRACTOR_REGISTRY[cfg.type]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Synthetic validation of SR-FD on a problem with known ground truth.
+"""Synthetic validation of FDSpeech on a problem with known ground truth.
 
-This is a CPU-only controlled check that the SR-FD machinery (differentiable
+This is a CPU-only controlled check that the FDSpeech machinery (differentiable
 Fréchet distance + queue/EMA moment estimation) actually steers a generator's
 distribution toward a target distribution. It uses a tiny in-memory feature
 extractor instead of Whisper/CTC, so it depends only on ``torch``.
@@ -12,12 +12,12 @@ Setup
   large reference set and summarize it with the same moment code the trainer
   uses (``accumulate_moments`` + ``finalize_accumulated_moments``).
 * Generator: an affine map ``z W^T + b`` (z ~ N(0, I)), initialized far from
-  the target so it parameterizes a Gaussian whose mean/covariance SR-FD moves.
+  the target so it parameterizes a Gaussian whose mean/covariance FDSpeech moves.
 
 Three runs are compared:
 
 1. ``baseline``  : generator frozen at init; FD measured but never trained.
-2. ``srfd``      : generator trained with SR-FD only (queue moments).
+2. ``srfd``      : generator trained with FDSpeech only (queue moments).
 3. ``supervised``: generator trained directly against the real mean via MSE
    (a perfect-supervision upper bound).
 
@@ -81,7 +81,7 @@ class LinearGenerator(nn.Module):
     """Affine generator ``x = z W^T + b`` with ``z ~ N(0, I)``.
 
     This directly parameterizes a Gaussian (mean ``b``, covariance ``W W^T``),
-    so SR-FD has a smooth target to drive toward and the ground-truth FD is
+    so FDSpeech has a smooth target to drive toward and the ground-truth FD is
     well-defined at every step.
     """
 
@@ -151,7 +151,7 @@ def main() -> int:
     init_fd = measure_true_fd(gen0, real, extractor, device)
     print(f"[baseline] init/frozen FD = {init_fd:.4f}", file=sys.stderr)
 
-    # Run 2: SR-FD (queue moments).
+    # Run 2: FDSpeech (queue moments).
     gen1 = fresh()
     loss_fn = SRFDEmaLoss(
         extractors=[FeatureExtractor(args.dim).to(device)],
@@ -202,10 +202,10 @@ def main() -> int:
 
     print("\n=== Summary ===", file=sys.stderr)
     print(f"  init FD       : {init_fd:.4f}", file=sys.stderr)
-    print(f"  SR-FD FD      : {srfd_final:.4f}  ({reduction:.1f}% reduction)", file=sys.stderr)
+    print(f"  FDSpeech FD   : {srfd_final:.4f}  ({reduction:.1f}% reduction)", file=sys.stderr)
     print(f"  supervised FD : {sup_final:.4f}", file=sys.stderr)
     if srfd_final >= 0.5 * init_fd:
-        print("  WARNING: SR-FD did not produce a meaningful reduction.", file=sys.stderr)
+        print("  WARNING: FDSpeech did not produce a meaningful reduction.", file=sys.stderr)
     return 0
 
 

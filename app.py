@@ -310,11 +310,13 @@ CSS = """
 .metric-band span { color: var(--muted); font-size: 13px; }
 .results-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 17px; background: white; }
 .results-caption { padding: 15px 17px; color: var(--muted); font-size: 12px; font-weight: 750; border-bottom: 1px solid var(--line); }
-.results-table { width: 100%; border-collapse: collapse; min-width: 850px; color: var(--ink); }
+.results-table { width: 100%; border-collapse: collapse; min-width: 850px; color: #172033; }
 .results-table th, .results-table td { padding: 13px 15px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13px; }
 .results-table th { background: var(--soft); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.results-table tbody td { background: #ffffff; color: #172033 !important; }
 .results-table tbody tr:last-child td { border-bottom: 0; }
-.results-table .ours-row { background: #f0efff; }
+.results-table tbody .ours-row td { background: #f0efff; color: #29235f !important; }
+.results-table tbody .ours-row strong { color: #4038b3 !important; }
 .method-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 12px; margin: 20px 0; }
 .method-flow .node { padding: 19px; border-radius: 16px; background: white; border: 1px solid var(--line); text-align: center; }
 .method-flow .arrow { color: var(--ours); font-size: 25px; font-weight: 900; }

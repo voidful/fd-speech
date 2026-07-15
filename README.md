@@ -63,7 +63,7 @@ intervals, ablations, and the complete evaluation protocol.
         ▼                         │
   ┌───────────────┐   gen   ┌─────────────┐   moments   ┌──────────────┐
   │ four-step     │ speech  │ frozen      │  μ_g, Σ_g   │ Fréchet      │
-  │ sampler       ├───────►│ extractors  ├────────────►│ distance     ├──► L_srfd
+  │ sampler       ├────────►│ extractors  ├────────────►│ distance     ├──► L_srfd
   │ VoxCPM2+LoRA  │         │ Whisper, CTC│             │              │
   └───────────────┘         └─────────────┘             └──────▲───────┘
                                                                │ μ_r, Σ_r

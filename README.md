@@ -1,17 +1,3 @@
----
-title: SR-FD TTS Comparison
-emoji: 🎧
-colorFrom: indigo
-colorTo: purple
-sdk: gradio
-sdk_version: 6.9.0
-app_file: app.py
-python_version: "3.10"
-pinned: false
-license: apache-2.0
-short_description: Compare VoxCPM2 4/10-step and SR-FD 4-step speech
----
-
 <div align="center">
 <h1>SR-FD: Fréchet Distance Loss on Speech Representations for Text-to-Speech</h1>
 

@@ -19,7 +19,7 @@ short_description: Compare VoxCPM2 4/10-step and SR-FD 4-step speech
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv%3A2607.06027-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2607.06027)
 [![Model Card](https://img.shields.io/badge/Model-LoRA%20adapter-yellow?logo=huggingface)](MODEL_CARD.md)
-[![Hugging Face Space](https://img.shields.io/badge/Space-live%20comparison-orange?logo=huggingface)](https://huggingface.co/spaces/voidful/srfd-tts-demo)
+[![Hugging Face Space](https://img.shields.io/badge/Space-live%20comparison-orange?logo=huggingface)](https://huggingface.co/spaces/voidful/fd-speech-demo)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
 </div>
@@ -125,8 +125,8 @@ Python 3.10 or newer and PyTorch 2.5 or newer are required for the SR-FD
 package.
 
 ```bash
-git clone https://github.com/voidful/srfd-tts.git
-cd srfd-tts
+git clone https://github.com/voidful/fd-speech.git
+cd fd-speech
 
 conda create -n srfd python=3.10 -y
 conda activate srfd
@@ -262,7 +262,7 @@ python scripts/paired_bootstrap.py \
 
 ## Audio demo
 
-The [Hugging Face Space](https://huggingface.co/spaces/voidful/srfd-tts-demo)
+The [Hugging Face Space](https://huggingface.co/spaces/voidful/fd-speech-demo)
 provides a three-column, same-prompt comparison of the original VoxCPM2 at
 four and ten steps and SR-FD at four steps. It includes ASR transcript diffs,
 per-sample WER, benchmark results, prompt/reference audio, and deliberately

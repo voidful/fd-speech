@@ -237,7 +237,7 @@ HERO = """
   <p>Aligned Seed-TTS English comparisons between the original VoxCPM2 at 4 and 10 steps and our SR-FD model at 4 steps.</p>
   <div class="hero-links">
     <a href="https://arxiv.org/abs/2607.06027" target="_blank">Paper ↗</a>
-    <a href="https://github.com/voidful/srfd-tts" target="_blank">Code ↗</a>
+    <a href="https://github.com/voidful/fd-speech" target="_blank">Code ↗</a>
     <a href="https://huggingface.co/openbmb/VoxCPM2" target="_blank">Base model ↗</a>
   </div>
   <div class="hero-stats">

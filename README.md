@@ -1,56 +1,84 @@
-# SR-FD: Fréchet Distance Loss on Speech Representations for Text-to-Speech
+---
+title: SR-FD TTS Comparison
+emoji: 🎧
+colorFrom: indigo
+colorTo: purple
+sdk: gradio
+sdk_version: 6.9.0
+app_file: app.py
+python_version: "3.10"
+pinned: false
+license: apache-2.0
+short_description: Compare VoxCPM2 4/10-step and SR-FD 4-step speech
+---
+
+<div align="center">
+<h1>SR-FD: Fréchet Distance Loss on Speech Representations for Text-to-Speech</h1>
+
+**A training-time distributional regularizer for intelligible few-step TTS**
+
+[![Paper](https://img.shields.io/badge/Paper-arXiv%3A2607.06027-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2607.06027)
+[![Model Card](https://img.shields.io/badge/Model-LoRA%20adapter-yellow?logo=huggingface)](MODEL_CARD.md)
+[![Hugging Face Space](https://img.shields.io/badge/Space-live%20comparison-orange?logo=huggingface)](https://huggingface.co/spaces/voidful/srfd-tts-demo)
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
+
+</div>
+
+## Overview
 
 **Speech Representation Fréchet Distance (SR-FD)** is a training-time
 distributional regularizer for tokenizer-free, few-step flow-matching TTS.
-Few-step diffusion / flow-matching TTS models are trained with *local*
-objectives (conditional flow matching, reconstruction, stop prediction) that
-never ask whether sampled speech follows the distribution of high-quality
-speech. When such a sampler is compressed to four steps, its output
-distribution can drift in content even while training loss looks healthy.
+Standard objectives such as conditional flow matching, reconstruction, and
+stop prediction supervise local behavior, but do not directly constrain the
+distribution of complete utterances produced by the low-step sampler.
 
-SR-FD closes this gap. During fine-tuning the model synthesizes speech with the
-**same few-step sampler used at deployment**, frozen Whisper and CTC encoders
-map that speech to features, and SR-FD matches the **mean and covariance** of
-those features to reference statistics computed offline from three
-complementary content targets — via a differentiable Fréchet distance (the same
-quantity behind FID/FAD). The loss requires **no discriminator** and adds **no
-inference-time computation**: at test time it is removed entirely.
+SR-FD operates on sampled speech. During fine-tuning, the model synthesizes an
+utterance with the **same four-step sampler used at deployment**. Frozen
+Whisper and wav2vec 2.0 CTC encoders map that speech to content features, and a
+differentiable Fréchet distance matches their mean and covariance to offline
+reference statistics from three complementary targets. SR-FD needs **no
+discriminator**, is removed after training, and adds **no inference-time
+parameters or computation**.
 
-> Base model: the external tokenizer-free flow-matching TTS model
-> [`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2). SR-FD is added on
-> top of LoRA fine-tuning; the deployed artifact is a four-step model plus a
-> LoRA adapter.
+> **Base model.** The experiments use the external tokenizer-free
+> flow-matching TTS model [`openbmb/VoxCPM2`](https://huggingface.co/openbmb/VoxCPM2).
+> The released model artifact is a LoRA adapter for that base model, not a
+> standalone checkpoint.
 
-## Headline result
+## Main result
 
-On Seed-TTS English (upstream scorer, 11,805 reference words), four-step SR-FD
-fine-tuning reverses the usual step-count trade-off: it beats not only the
-four-step baseline but also the ten-step baseline.
+On the 1,088-prompt Seed-TTS English `test-en` set (11,805 reference words),
+four-step SR-FD fine-tuning improves the original four-step VoxCPM2 WER from
+2.2279% to 1.4147%, a **36.5% relative reduction**, and also improves on the
+original ten-step baseline by **18.5% relative**.
 
 | System | Steps | Upstream WER ↓ | SIM ↑ | UTMOS / DNSMOS OVRL / P808 ↑ |
-|---|:---:|---|---|---|
-| Base | 4 | 263/11805 = 2.2279% | 0.7433 | 3.2974 / 2.8950 / 3.5296 |
-| Base | 10 | 205/11805 = 1.7366% | 0.7610 | 3.8072 / 3.0866 / 3.6689 |
-| **+ SR-FD (ours)** | **4** | **167/11805 = 1.4147%** | **0.7613** | 3.7637 / 3.0711 / 3.6507 |
-| ARCHI-TTS (reported) | 4 | 1.47% | – | – |
+|---|:---:|---:|---:|---:|
+| VoxCPM2 | 4 | 263/11805 = 2.2279% | 0.7433 | 3.2974 / 2.8950 / 3.5296 |
+| VoxCPM2 | 10 | 205/11805 = 1.7366% | 0.7610 | 3.8072 / 3.0866 / 3.6689 |
+| **VoxCPM2 + SR-FD (ours)** | **4** | **167/11805 = 1.4147%** | **0.7613** | **3.7637 / 3.0711 / 3.6507** |
+| F5-TTS (reported) | 32 | 1.83% | – | – |
+| ARCHI-TTS (reported) | 32 | 1.47% | – | – |
 
-Four-step SR-FD reduces WER by **36.5% relative** to the four-step baseline and
-**18.5% relative** to the ten-step baseline; both gaps are significant under an
-utterance-level paired bootstrap, and speaker similarity is preserved. The gain
-consists mainly of content-substitution reductions across all prompt lengths.
-SIM, UTMOS, and DNSMOS are objective proxies, not human MOS.
+The two paired WER improvements are significant under utterance-level
+bootstrap. A blinded comparison against the ten-step baseline collected 229
+judgments from 13 listeners; the decisive preference split was near even
+(61 SR-FD vs. 67 ten-step), with equivalence supported under the paper's
+pre-specified 10-point margin. SIM, UTMOS, and DNSMOS are objective proxies,
+not human MOS. See the [paper](https://arxiv.org/abs/2607.06027) for confidence
+intervals, ablations, and the complete evaluation protocol.
 
-## Pipeline
+## Method
 
-```
+```text
                          gradient (training only)
    text / prompt                  ▲
         │                         │
         ▼                         │
   ┌───────────────┐   gen   ┌─────────────┐   moments   ┌──────────────┐
-  │ few-step      │ speech  │ frozen      │  μ_g, Σ_g   │ Fréchet      │
-  │ sampler       ├────────►│ extractors  ├────────────►│ distance     ├──► L_srfd
-  │ (VoxCPM2+LoRA)│         │ Whisper,CTC │             │              │
+  │ four-step     │ speech  │ frozen      │  μ_g, Σ_g   │ Fréchet      │
+  │ sampler       ├───────►│ extractors  ├────────────►│ distance     ├──► L_srfd
+  │ VoxCPM2+LoRA  │         │ Whisper, CTC│             │              │
   └───────────────┘         └─────────────┘             └──────▲───────┘
                                                                │ μ_r, Σ_r
                                                    ┌───────────┴───────────┐
@@ -59,114 +87,256 @@ SIM, UTMOS, and DNSMOS are objective proxies, not human MOS.
                                                    └───────────────────────┘
 ```
 
-The model samples speech with the deployment-time four-step sampler; frozen
-Whisper and CTC extractors map it to features whose mean/covariance are matched
-to offline reference moments via a Fréchet distance. Gradients flow only into
-the LoRA weights. See [docs/method.md](docs/method.md) for the full method and
-[docs/integration.md](docs/integration.md) for how the loss plugs into the base
-model.
+The three targets are:
 
-## What's in this repository
+| Target | Source | Extractor | Role |
+|---|---|---|---|
+| Low-step Whisper anchor | ASR-verified four-step generations | Whisper | Deployment-matched content anchor |
+| Teacher CTC target | Ten-step teacher generations | wav2vec 2.0 CTC | Higher-step content transfer |
+| Real-speech CTC target | Real LibriTTS speech | wav2vec 2.0 CTC | Natural-speech grounding |
 
-```
-srfd/                       # the SR-FD loss package (the contribution)
-  frechet.py                #   differentiable Fréchet distance on GPU
-  moments.py                #   batch / streaming / queue moment utilities
-  extractors.py             #   frozen Whisper-encoder + wav2vec2-CTC extractors
-  loss.py                   #   SRFDEmaLoss (queue/EMA moments, multi-target FD)
-  stats_io.py               #   save/load reference statistics
-  conditions.py             #   (optional) conditional statistics keys
-configs/
-  srfd_compact3.yaml        # paper main model: 3 targets, 2 extractors, λ=2e-4
-scripts/
-  compute_reference_stats.py  # offline reference moments (one run per target)
-  score_seed_tts_eval.py      # Seed-TTS WER/CER + WavLM speaker similarity
-  score_utmos_objective.py    # UTMOS objective proxy
-  score_speechmos_dnsmos.py   # DNSMOS objective proxy
-  paired_bootstrap.py         # utterance-level paired bootstrap significance
-experiments/
-  synthetic_validation.py   # CPU-only controlled check (known ground-truth FD)
-tests/                      # unit tests for the FD math, moments, and loss
-docs/                       # method + integration notes
-demo/                       # anonymized demo: static site, results, LoRA adapter
-```
+Generated moments are estimated with a detached feature queue, so only the
+current mini-batch retains gradients. See [docs/method.md](docs/method.md) for
+the full loss and [docs/integration.md](docs/integration.md) for the base-model
+integration points.
 
-This is a method-focused repository: it ships the SR-FD loss, a paper-aligned
-config, reproduction/evaluation scripts, tests, and a self-contained demo. The
-base TTS model is an external dependency.
+## What this public release contains
 
-## Quick start
+| Artifact | Included | Notes |
+|---|:---:|---|
+| Differentiable SR-FD loss and moment utilities | Yes | `srfd/` |
+| Frozen Whisper/CTC extractor wrappers | Yes | Heavy models download separately |
+| Paper-aligned three-target config | Yes | Paths are local placeholders |
+| Reference-statistics and evaluation scripts | Yes | External audio/benchmarks required |
+| Selected four-step LoRA adapter | Yes | `demo/model/`, used with VoxCPM2 |
+| Aligned audio demo and result metadata | Yes | Ten prompts and seven systems |
+| VoxCPM2 source and base weights | No | Use the upstream release |
+| Training manifests, reference audio, and precomputed moments | No | Not redistributed |
+| Turnkey end-to-end training entrypoint | No | Integrate the loss into the base recipe as documented |
+
+The repository is method-focused. It supports the public loss implementation,
+the paper configuration, adapter inference, evaluation, and controlled tests;
+it does not claim that the private training corpus layout or a patched base
+training stack is bundled.
+
+## Installation
+
+Python 3.10 or newer and PyTorch 2.5 or newer are required for the SR-FD
+package.
 
 ```bash
-pip install -e .            # core loss (needs torch)
-pip install -e ".[test]"    # + pytest, pyyaml
+git clone https://github.com/voidful/srfd-tts.git
+cd srfd-tts
 
-pytest -q                   # 22 tests: FD math, moments, loss, config
+conda create -n srfd python=3.10 -y
+conda activate srfd
+python -m pip install -U pip
+pip install -e ".[test]"
+```
 
-# CPU-only sanity check: SR-FD drives a generator toward a target distribution
+Verify the loss implementation with the unit tests and the CPU-only synthetic
+experiment:
+
+```bash
+pytest -q
 python experiments/synthetic_validation.py --steps 1500
-# -> SR-FD reduces a known ground-truth Fréchet distance by ~99% (mean-only
-#    supervision cannot, because it never fixes the covariance).
 ```
 
-The package is import-safe without the heavy encoders; only the Whisper/CTC
-extractors require `transformers` + `torchaudio` (`pip install -e ".[extractors]"`).
-
-## Reproduction outline
-
-1. **Reference statistics** (offline, once) — compute moments for the three
-   targets. Each is one invocation with a different source manifest:
-
-   ```bash
-   # 1. low-step Whisper anchor   (ASR-verified four-step generations)
-   python scripts/compute_reference_stats.py --config configs/srfd_compact3.yaml \
-       --reps whisper_anchor8_p64 --manifest data/ref/asr_true4_good.jsonl \
-       --out stats/ref_whisper_anchor_asr_true4_good.pt
-   # 2. teacher CTC target        (ten-step teacher generations)
-   python scripts/compute_reference_stats.py --config configs/srfd_compact3.yaml \
-       --reps ctc_content_p64 --manifest data/ref/teacher_t10.jsonl \
-       --out stats/ref_ctc_content_teacher_t10.pt
-   # 3. real-speech CTC target    (real voice-cloning speech)
-   python scripts/compute_reference_stats.py --config configs/srfd_compact3.yaml \
-       --reps ctc_content_p64 --manifest data/ref/real_voiceclone.jsonl \
-       --out stats/ref_ctc_content_real_voiceclone.pt
-   ```
-
-2. **Fine-tune with SR-FD** — wire `loss/srfd` into the base model's training
-   step with `configs/srfd_compact3.yaml` (see
-   [docs/integration.md](docs/integration.md)). Two stages: a supervised LoRA
-   adaptation, then 1600 steps with SR-FD enabled.
-
-3. **Evaluate** on Seed-TTS English:
-
-   ```bash
-   python scripts/score_seed_tts_eval.py --listing runs/srfd/wav_res_ref_text \
-       --out_json runs/srfd/metrics.json --lang en
-   python scripts/score_utmos_objective.py  --audio_dir runs/srfd/wav --out_json runs/srfd/utmos.json
-   python scripts/score_speechmos_dnsmos.py --wav_dir   runs/srfd/wav --out_json runs/srfd/dnsmos.json
-   python scripts/paired_bootstrap.py --a runs/base4/per_utt_wer.jsonl \
-       --b runs/srfd/per_utt_wer.jsonl --metric wer
-   ```
-
-## Demo
-
-`demo/` is a self-contained, anonymized bundle: a static website
-(`demo/site/`), the Seed-TTS English results (`demo/data/results.json`), and the
-packaged compact 3-target SR-FD LoRA adapter (`demo/model/`, 167 upstream word
-errors). View it locally:
+The package is import-safe without the speech encoders. Install their optional
+dependencies only when computing reference statistics or training with audio:
 
 ```bash
-python3 -m http.server 8080 --directory demo/site   # then open http://localhost:8080
+pip install -e ".[extractors]"
 ```
 
-The site aligns the same Seed-TTS prompts across the base 4-step / 10-step
-models, matched 4-step fine-tuning without SR-FD, FT + SR-FD, and the three
-leave-one-out ablations, with per-utterance reference / ASR transcripts and a
-Negative-Cases tab that surfaces remaining failure modes.
+## Inference with the released adapter
+
+The bundled artifact at `demo/model/` is a LoRA adapter. A current VoxCPM
+installation can load the adapter directory together with the upstream
+VoxCPM2 base model. The first run downloads the 2B-parameter base checkpoint;
+a CUDA GPU is recommended.
+
+```bash
+pip install -U voxcpm soundfile
+```
+
+```python
+import soundfile as sf
+from voxcpm import VoxCPM
+
+model = VoxCPM.from_pretrained(
+    "openbmb/VoxCPM2",
+    load_denoiser=False,
+    lora_weights_path="demo/model",
+)
+
+wav = model.generate(
+    text="The quick brown fox jumps over the lazy dog.",
+    cfg_value=2.35,
+    inference_timesteps=4,
+    normalize=True,
+    denoise=False,
+    seed=0,
+)
+sf.write("srfd.wav", wav, model.tts_model.sample_rate)
+```
+
+For voice cloning, also pass `prompt_wav_path` and its exact `prompt_text` as
+described by the [VoxCPM documentation](https://github.com/OpenBMB/VoxCPM).
+Read the [model card](MODEL_CARD.md) before deployment.
+
+## FD post-training and reproduction
+
+### 1. Prepare reference manifests
+
+Each JSONL manifest must contain an `audio` field pointing to a local WAV or
+FLAC file. Build separate manifests for the three reference targets. The
+source audio is not included in this repository.
+
+### 2. Compute offline reference moments
+
+Run one invocation per target:
+
+```bash
+# Low-step Whisper anchor
+python scripts/compute_reference_stats.py \
+  --config configs/srfd_compact3.yaml \
+  --reps whisper_anchor8_p64 \
+  --manifest data/ref/asr_true4_good.jsonl \
+  --out stats/ref_whisper_anchor_asr_true4_good.pt
+
+# Ten-step teacher CTC target
+python scripts/compute_reference_stats.py \
+  --config configs/srfd_compact3.yaml \
+  --reps ctc_content_p64 \
+  --manifest data/ref/teacher_t10.jsonl \
+  --out stats/ref_ctc_content_teacher_t10.pt
+
+# Real-speech CTC target
+python scripts/compute_reference_stats.py \
+  --config configs/srfd_compact3.yaml \
+  --reps ctc_content_p64 \
+  --manifest data/ref/real_voiceclone.jsonl \
+  --out stats/ref_ctc_content_real_voiceclone.pt
+```
+
+### 3. Integrate and fine-tune
+
+The base training step must expose a differentiable four-step sampler, decode
+the generated latent to waveform, apply the duration gate, and add
+`lambda_srfd * loss/srfd` to the existing objective. The public API and a
+training-step sketch are in [docs/integration.md](docs/integration.md).
+
+The paper recipe first performs supervised LoRA adaptation, then runs 1,600
+additional SR-FD steps using [configs/srfd_compact3.yaml](configs/srfd_compact3.yaml).
+The pretrained base weights remain frozen.
+
+## Evaluation
+
+Install the evaluation dependencies:
+
+```bash
+pip install -e ".[eval]"
+```
+
+The Seed-TTS benchmark audio and the generated-system listings are external
+inputs and are not bundled. Given a `generated_wav|reference_wav|target_text`
+listing, the included scripts compute WER/CER, speaker similarity, objective
+quality proxies, and paired significance:
+
+```bash
+python scripts/score_seed_tts_eval.py \
+  --listing runs/srfd/wav_res_ref_text \
+  --out_json runs/srfd/metrics.json --lang en
+
+python scripts/score_utmos_objective.py \
+  --audio_dir runs/srfd/wav --out_json runs/srfd/utmos.json
+
+python scripts/score_speechmos_dnsmos.py \
+  --wav_dir runs/srfd/wav --out_json runs/srfd/dnsmos.json
+
+python scripts/paired_bootstrap.py \
+  --a runs/base4/per_utt_wer.jsonl \
+  --b runs/srfd/per_utt_wer.jsonl --metric wer
+```
+
+## Audio demo
+
+The [Hugging Face Space](https://huggingface.co/spaces/voidful/srfd-tts-demo)
+provides a three-column, same-prompt comparison of the original VoxCPM2 at
+four and ten steps and SR-FD at four steps. It includes ASR transcript diffs,
+per-sample WER, benchmark results, prompt/reference audio, and deliberately
+surfaced negative cases. The Space serves checked-in aligned audio, so it runs
+on CPU hardware without loading three 2B-parameter systems.
+
+Run the Gradio Space locally:
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+The earlier static demo is still available:
+
+```bash
+python3 -m http.server 8080 --directory demo/site
+# Open http://localhost:8080
+```
+
+See [demo/README.md](demo/README.md) for the bundle layout and selection
+metadata.
+
+## Repository layout
+
+```text
+srfd/                         SR-FD loss, extractors, moments, statistics I/O
+configs/srfd_compact3.yaml    paper main configuration
+scripts/                      reference-statistics and evaluation utilities
+experiments/                  CPU-only synthetic validation
+tests/                        unit and config tests
+docs/                         method and integration notes
+demo/model/                   selected LoRA adapter
+demo/site/                    static aligned-audio demo
+app.py                        Hugging Face Spaces comparison app
+MODEL_CARD.md                 model scope, metrics, limitations, and usage
+```
+
+## Limitations and responsible use
+
+SR-FD was evaluated as an **English intelligibility regularizer** for a
+four-step VoxCPM2 setting. The paper does not establish improvements for every
+language, base model, sampler, perceptual attribute, or prompt. Lower
+representation FD is not a reliable standalone model-selection metric, and
+individual utterances can regress even when aggregate WER improves.
+
+Use only consented voices. Do not use the adapter for impersonation, fraud,
+voice-print bypass, or non-consensual content, and clearly label synthetic
+audio.
 
 ## License
 
-Apache-2.0 (see [LICENSE](LICENSE)). The base model `openbmb/VoxCPM2` is
-released by its authors under its own terms; consult its model card. Only
-fine-tune on consented voices; do not use for impersonation, fraud, voice-print
-bypass, or non-consensual content, and label synthetic audio.
+The SR-FD code and bundled adapter are released under
+[Apache-2.0](LICENSE). VoxCPM2, pretrained extractors, datasets, and evaluation
+tools remain subject to their respective licenses and terms.
+
+## Acknowledgements
+
+This work builds on [VoxCPM2](https://huggingface.co/openbmb/VoxCPM2) and uses
+representations from [Whisper](https://github.com/openai/whisper) and
+[wav2vec 2.0](https://github.com/facebookresearch/fairseq/tree/main/examples/wav2vec).
+Evaluation follows [Seed-TTS](https://github.com/BytedanceSpeech/seed-tts-eval),
+and the training/reference recipe uses LibriTTS-derived voice-cloning material.
+
+## Citation
+
+If you find SR-FD useful, please cite:
+
+```bibtex
+@article{chung2026srfd,
+  title   = {Fr\'{e}chet Distance Loss on Speech Representations for Text-to-Speech Synthesis},
+  author  = {Chung, Ho-Lam and Huang, Kuan-Po and Lu, Bo-Ru and Lee, Hung-yi},
+  journal = {arXiv preprint arXiv:2607.06027},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2607.06027}
+}
+```

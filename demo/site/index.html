@@ -112,12 +112,16 @@
         </div>
         <pre class="code"><code>from voxcpm import VoxCPM
 
-model = VoxCPM.from_pretrained("openbmb/VoxCPM2")
-# Load the SR-FD LoRA adapter from ./model using the repository loader.
+model = VoxCPM.from_pretrained(
+    "openbmb/VoxCPM2",
+    load_denoiser=False,
+    lora_weights_path="demo/model",
+)
 wav = model.generate(
     text="SR-FD improves true four-step VoxCPM2 synthesis.",
     cfg_value=2.35,
     inference_timesteps=4,
+    seed=0,
 )</code></pre>
       </section>
     </main>

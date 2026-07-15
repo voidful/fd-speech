@@ -106,12 +106,27 @@ loss.backward()
 At test time SR-FD is gone entirely — the deployed model is the base four-step
 model plus the LoRA adapter. Loading the adapter and generating:
 
+With a current upstream `voxcpm` installation, load the adapter when the base
+model is constructed and use the public `inference_timesteps` argument:
+
 ```python
-from voxcpm import VoxCPM            # external base model package
-model = VoxCPM.from_pretrained("openbmb/VoxCPM2")
-model.load_lora_weights("demo/model")   # the packaged SR-FD adapter
-wav = model.generate(text=..., prompt_wav_path=..., prompt_text=...,
-                     n_timesteps=4, cfg_value=2.35)
+import soundfile as sf
+from voxcpm import VoxCPM
+
+model = VoxCPM.from_pretrained(
+    "openbmb/VoxCPM2",
+    load_denoiser=False,
+    lora_weights_path="demo/model",
+)
+wav = model.generate(
+    text="The quick brown fox jumps over the lazy dog.",
+    inference_timesteps=4,
+    cfg_value=2.35,
+    normalize=True,
+    denoise=False,
+    seed=0,
+)
+sf.write("srfd.wav", wav, model.tts_model.sample_rate)
 ```
 
 No extractors, queues, reference moments, or Fréchet computation are involved at

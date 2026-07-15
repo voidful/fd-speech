@@ -40,6 +40,11 @@ test = [
     "pyyaml",
 ]
 
+[project.urls]
+Paper = "https://arxiv.org/abs/2607.06027"
+Source = "https://github.com/voidful/srfd-tts"
+Documentation = "https://github.com/voidful/srfd-tts#readme"
+
 [tool.setuptools]
 packages = ["srfd"]
 

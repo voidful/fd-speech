@@ -11,13 +11,12 @@ training_state.json
 selected_checkpoint.json
 ```
 
-The adapter is selected by the same protocol used in the paper-facing table:
-
-1. Train compact 3-target SR-FD variants to 1600 steps.
-2. Select checkpoints on the 200-prompt Seed-TTS gate subset.
-3. Promote selected checkpoints to the full Seed-TTS English test-en set.
-4. Use upstream Seed-TTS WER as the primary selection metric.
-5. Check UTMOS and DNSMOS as objective quality proxies.
+The main three-target run is the step-1600 checkpoint selected on the full-set
+WER frontier, matching the paper's main table. The leave-one-target-out
+ablations use a separate protocol: select on the fixed 200-prompt gate subset,
+then report the selected checkpoints on the full Seed-TTS English `test-en`
+set. Upstream Seed-TTS WER is the primary metric; UTMOS and DNSMOS are
+objective quality checks.
 
 Selected checkpoint:
 

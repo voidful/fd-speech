@@ -62,7 +62,7 @@
     },
     {
       "name": "ARCHI-TTS reported",
-      "steps": "4 / few-step",
+      "steps": "32",
       "ft": null,
       "srfd": null,
       "wer_errors": null,
@@ -71,7 +71,7 @@
       "utmos": null,
       "dnsmos_ovrl": null,
       "dnsmos_p808": null,
-      "note": "Reported WER reference only; audio unavailable for proxy scoring."
+      "note": "Reported 32-step WER reference only; audio unavailable for proxy scoring."
     }
   ],
   "compact3_targets": [

@@ -4,7 +4,7 @@ A self-contained, anonymized demo for the four-step SR-FD model. It packages:
 
 - a static demo website under `site/`
 - aligned Seed-TTS English audio comparisons under `site/audio/`
-- Seed-TTS English benchmark results under `data/results.json`
+- Seed-TTS English benchmark results under `site/results.json`
 - the compact 3-target SR-FD LoRA adapter under `model/`
 
 The model is a LoRA adapter for `openbmb/VoxCPM2`, **not** a standalone full
@@ -23,7 +23,7 @@ The packaged adapter obtains **167 word errors** on upstream Seed-TTS English
 | Base VoxCPM2 | 10 | No | No | 205/11805 = 1.7366% | 3.8072 / 3.0866 / 3.6689 |
 | Matched FT | 4 | Yes | No | 174/11805 = 1.4740% | 3.7615 / 3.0729 / 3.6522 |
 | FT + SR-FD | 4 | Yes | Yes | 167/11805 = 1.4147% | 3.7637 / 3.0711 / 3.6507 |
-| ARCHI-TTS reported | 4 | – | – | 1.47% | – |
+| ARCHI-TTS reported | 32 | – | – | 1.47% | – |
 
 ## Compact 3-target SR-FD
 
@@ -35,15 +35,16 @@ The compact target set keeps only content-centered SR-FD targets:
    generations.
 3. `real_ctc_content` — CTC posterior statistics from real voice-cloning speech.
 
-This keeps the story focused on few-step intelligibility. The selected compact
-checkpoint is `srfd_compact3/step_0001600`; among the promoted compact variants
-it is the only one that reaches 167 upstream word errors (others score 173,
-176, 182).
+This keeps the story focused on few-step intelligibility. The selected main
+checkpoint is `srfd_compact3/step_0001600`, chosen on the full-set WER frontier;
+it reaches 167 upstream word errors. The three leave-one-target-out ablations
+are selected on the fixed 200-prompt gate subset and score 173, 176, and 182
+errors on the full set.
 
 ## Local demo
 
 ```bash
-python3 -m http.server 8080 --directory site   # then open http://localhost:8080
+python3 -m http.server 8080 --directory demo/site   # run from the repository root
 ```
 
 The Audio section compares the same Seed-TTS prompts across the base 4-step and
